@@ -6,41 +6,46 @@
         <tab-item class="vux-center" :selected="demo2 === item" v-for="(item, index) in list1" @click="demo2 = item" :key="index">{{item}}</tab-item>
       </tab>
     </div>  
-    <div class="rest">
-      <swiper v-model="index" height="100%" :show-dots="false">
-        <swiper-item v-for="n in list1.length" :key="n" :selected="n===1">
-          <div class="box-justify item-key">
-            <p class="field">电脑名</p>
-            <p class="field">所属人</p>
-            <p class="field field-date">录入时间</p>
-            <p class="field field-status">状态</p>
-          </div>
-          <div v-for="(item, index) in list2" :key="index" class="tab-swiper  bd-bottom">
-            <div class="box-justify item-row" @click="operate(item,index)">
-              <p class="field">{{item.name}}</p>
-              <p class="field">{{item.userName}}</p>
-              <div class="field field-date" @click.stop>
-                <datetime
+    <div class="rest" style="overflow:auto">
+      
+        <swiper v-model="index" height="100%" :show-dots="false">
+          <!--<scroller class="scroll-wrapper" :on-refresh="refresh"
+               :on-infinite="infiniteHandler"
+               style="padding-top: 44px;">-->
+          <swiper-item v-for="n in list1.length" :key="n" :selected="n===1">
+            <div class="box-justify item-key">
+              <p class="field">电脑名</p>
+              <p class="field">所属人</p>
+              <p class="field field-date">录入时间</p>
+              <p class="field field-status">状态</p>
+            </div>
+            <div v-for="(item, index) in list2" :key="item.key" class="tab-swiper  bd-bottom">
+              <div class="box-justify item-row" @click="operate(item,index)">
+                <p class="field">{{item.name}}</p>
+                <p class="field">{{item.userName}}</p>
+                <div class="field field-date" @click.stop>
+                  <datetime
 
-                  v-model="item.addTime"
-                  @on-change="dateChange"
-                  @on-cancel="dateCancel"
-                  @on-confirm="dateConfirm"
-                  @on-hide="dateHide"></datetime>
+                    v-model="item.addTime"
+                    @on-change="dateChange"
+                    @on-cancel="dateCancel"
+                    @on-confirm="dateConfirm"
+                    @on-hide="dateHide"></datetime>
+                </div>
+                <div class="field field-status" @click.stop>
+                  <selector placeholder="" v-model="item.status" title="" name="district" :options="selectList" @on-change=""></selector>
+                </div>
               </div>
-              <div class="field field-status" @click.stop>
-                <selector placeholder="" v-model="item.status" title="" name="district" :options="selectList" @on-change=""></selector>
+              <div class="item-operate" v-show="item.isShow">
+                <div class="box-justify operate-row">
+                  <p class="operate-btn" @click="deleteItem(index)">删除</p>
+                </div>
               </div>
             </div>
-            <div class="item-operate" v-show="item.isShow">
-              <div class="box-justify operate-row">
-                <p class="operate-btn" @click="top(index)">置顶</p>
-                <p class="operate-btn" @click="deleteItem(index)">删除</p>
-              </div>
-            </div>
-          </div>
-        </swiper-item>
-      </swiper>
+          </swiper-item>
+          <!--</scroller>-->
+        </swiper>
+      
     </div>
     <div class="notice box-start">
       <p class="notice-label">公告：</p>
@@ -54,6 +59,12 @@
 
 
 <script>
+import Vue from 'vue'
+import VueScroller from 'vue-scroller'
+Vue.use(VueScroller)  
+import axios from 'axios';
+
+const api = '/static/ajax-data/infinite-loading.txt';
 import { Tab, TabItem, Sticky, Divider, XButton, Swiper, SwiperItem, Datetime, Selector, Marquee, MarqueeItem, Toast } from 'vux'
 const list1 = () => [
       '深圳公司', 
@@ -64,14 +75,25 @@ const list1 = () => [
   ]
   const list2 = () => [
         {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : true}, 
+        {name : "戴尔002",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
+        {name : "戴尔003",  userName:"小王"  ,addTime : "2017-06-01",status : "0",isShow : false},
+        {name : "戴尔004",  userName:"小王"  ,addTime : "2017-06-01",status : "0",isShow : false},
+        {name : "戴尔005",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
+        {name : "戴尔006",  userName:"小王"  ,addTime : "2017-06-01",status : "0",isShow : false},
+        {name : "戴尔007",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
+        {name : "戴尔008",  userName:"小王"  ,addTime : "2017-06-01",status : "0",isShow : false},
+        {name : "戴尔009",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
+        {name : "戴尔0010",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
+        {name : "戴尔0011",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
+        {name : "戴尔0012",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
+        {name : "戴尔0013",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
+        {name : "戴尔0014",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
+        /*{name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
         {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
-        {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "0",isShow : false},
-        {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "0",isShow : false},
         {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
-        {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "0",isShow : false},
         {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
-        {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "0",isShow : false},
-        {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false}, 
+        {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false},
+        {name : "戴尔001",  userName:"小王"  ,addTime : "2017-06-01",status : "1",isShow : false}, */
         
     ]
 
@@ -103,10 +125,14 @@ export default {
 
     }
   },
+  created(){
+    for(var i=0,len=this.list2.length;i<len;i++){
+      this.list2[i].key= "key" + i;
+    }
+  },
   methods: {
-    top(){
+   
 
-    },
     dateConfirm(){
 
     },
@@ -208,6 +234,9 @@ export default {
   body{
     background-color:#fff;
   }
+  ._v-content{
+    height:100%;
+  }  
 </style>
 <style lang="less" scoped>
 @import '~vux/src/styles/1px.less';
@@ -279,4 +308,13 @@ export default {
       width:80px;
     }
   }
+  .scroll-wrapper{
+    position:static;
+    
+  }
+  .vux-slider > .vux-swiper > .vux-swiper-item{
+    overflow-x:hidden;
+    overflow-y:auto;
+  }
+  
 </style>
