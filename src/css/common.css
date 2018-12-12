@@ -714,19 +714,19 @@ a:focus {
     background-color:#fff;
 }
 .bd{
-    border: 1px solid #f7f9fa;
+    border: 1px solid #999;
 }
 .bd-top{
-    border-top: 1px solid #f7f9fa;
+    border-top: 1px solid #999;
 }
 .bd-right{
-    border-right: 1px solid #f7f9fa;
+    border-right: 1px solid #999;
 }
 .bd-bottom{
-    border-bottom: 1px solid #f7f9fa;
+    border-bottom: 1px solid #999;
 }
 .bd-left{
-    border-left: 1px solid #f7f9fa;
+    border-left: 1px solid #999;
 }
 .blue{
     color:#4cacf3;

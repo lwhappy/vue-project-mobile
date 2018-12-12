@@ -7,6 +7,7 @@ import App from './App'
 import Home from './components/Home'
 import Tab from './components/Tab'
 import AlertDemo from './components/HelloFromVux'
+import Word from './components/Word'
 
 Vue.use(VueRouter)
 
@@ -22,7 +23,11 @@ const routes = [
 	{
   		path: '/alert',
   		component: AlertDemo
-	}
+	},
+  {
+      path: '/word',
+      component: Word
+  }
 ]
 
 const router = new VueRouter({
