@@ -4,30 +4,35 @@ import Vue from 'vue'
 import FastClick from 'fastclick'
 import VueRouter from 'vue-router'
 import App from './App'
-import Home from './components/Home'
-import Tab from './components/Tab'
-import AlertDemo from './components/HelloFromVux'
+//import Home from './components/Home'
+//import Tab from './components/Tab'
+//import AlertDemo from './components/HelloFromVux'
 import Word from './components/Word'
+import WordIndex from './components/WordIndex'
 
 Vue.use(VueRouter)
 
 const routes = [
 	{
   		path: '/',
-  		component: Home
+  		component: WordIndex
 	},
-	{
+	/*{
   		path: '/tab',
   		component: Tab
 	},
 	{
   		path: '/alert',
   		component: AlertDemo
-	},
+	},*/
   {
-      path: '/word',
+      path: '/word/:name',
       component: Word
-  }
+  },
+  /*{
+      path: '/w',
+      component: WordIndex
+  }*/
 ]
 
 const router = new VueRouter({
