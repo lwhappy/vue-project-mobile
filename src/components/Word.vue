@@ -2,7 +2,7 @@
   <div class="tab-container box-v-start align-stretch">
     <div class="tab-header">
       <tab :line-width=2 active-color='#52A3E3' v-model="swiperIndex">
-        <tab-item class="vux-center" :selected="index === swiperIndex" v-for="(value,index) in list1"  :key="index" badge-background="#38C972" badge-color="#fff" badge-label="0">{{value}}</tab-item>
+        <tab-item class="vux-center" :selected="index === swiperIndex" v-for="(value,index) in list1"  :key="index" badge-background="#38C972" badge-color="#fff" :badge-label="list2[value].list.length.toString()">{{value}}</tab-item>
       </tab>
     </div>  
     <div class="rest" style="overflow:auto">
@@ -12,53 +12,56 @@
                :on-infinite="infiniteHandler"
                style="padding-top: 44px;">-->
           <swiper-item v-for="(value,outerIndex) in list1" :key="outerIndex" :selected="outerIndex===swiperIndex">
-            <div v-show="outerIndex !== swiperIndex"><loading :show="showLoading" text="Loading"></loading></div>
+            <div v-show="outerIndex !== swiperIndex" style="height:100%"><loading :show="showLoading" text="Loading"></loading></div>
             <div v-show="outerIndex === swiperIndex"> 
               <div v-for="(item, index) in currentList.list" :key="index" class="tab-swiper  bd-bottom">
                 <div v-if="type === 0" class="" >
                   <div  class="item-row item-row1">
-                    <p class="size1">
-                      <span class="color1">{{item.word_name}}</span>
-                      <span class="color2">[{{item.ph_am}}]</span>
-                    </p>
+                    <div class="size1 box-start">
+                      <p class="num color2">{{index + 1}}.</p>
+                      <p class="color1">{{item.word_name}}</p>
+                      <p class="color2">[{{item.ph_am}}]</p>
+                    </div>
                   </div>
                   <div class="item-row item-row2">
                     <p class="ellipsis color2 size2">{{item.means}}</p>
                   </div>
                 </div>
-                 <div v-if="type === 1" >
-                   <div class="item-row item-row1">
+                 <div v-if="type === 1" @click="showPopupPicker(index)">
+                   <div class="item-row item-row1 box-start">
+                    <p class="num color2">{{index + 1}}.</p>
                     <p class="ellipsis color1 size1">{{item.means}}</p>
                    </div>
-                   <div  class="box-justify item-row">
+                   <div  class="box-justify item-row" >
                        
-                       <div class="color2 size2 box-justify">
-                          <p @click="showPopupPicker(index)">点击选择</p>
+                       <div class="color2 size2 box-justify item-left" >
+                          <p v-show="!currentList.wordModelList[index][0]" >点击选择</p>
                           <p>{{currentList.wordModelList[index][0]}}</p>
                        </div>
                        <!--<p style="display:none">{{wordModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
                        
-                     <p v-show="currentList.wordModelList[index][0] && currentList.wordModelList[index][0] === item.word_name"><icon  type="success"></icon></p>
-                     <p v-show="currentList.wordModelList[index][0] && currentList.wordModelList[index][0] !== item.word_name"><icon  type="warn"></icon></p>
+                     <p class="item-right" v-show="currentList.wordModelList[index][0] && currentList.wordModelList[index][0] === item.word_name"><icon  type="success"></icon></p>
+                     <p class="item-right" v-show="currentList.wordModelList[index][0] && currentList.wordModelList[index][0] !== item.word_name"><icon  type="warn"></icon></p>
                    </div>
                    
                  </div>
-                 <div v-if="type === 2" >
-                   <div  class="item-row item-row1">
+                 <div v-if="type === 2" @click="showPopupPicker(index)">
+                   <div  class="item-row item-row1 box-start">
+                     <p class="num color2">{{index + 1}}.</p>
                      <p>
                        <span>{{item.word_name}}</span>
                        <span>[{{item.ph_am}}]</span>
                      </p>
                    </div>
-                   <div  class="box-justify item-row item-row2">
-                       <div class="color2 size2 box-justify">
-                          <p @click="showPopupPicker(index)">点击选择</p>
+                   <div  class="box-justify item-row item-row2" >
+                       <div class="color2 size2 box-justify item-left" >
+                          <p v-show="!currentList.meanModelList[index][0]" >点击选择</p>
                           <p>{{currentList.meanModelList[index][0]}}</p>
                        </div>
                        <!--<p style="display:none">{{meanModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
                        
-                     <p v-show="currentList.meanModelList[index][0] && currentList.meanModelList[index][0] === item.means"><icon  type="success"></icon></p>
-                     <p v-show="currentList.meanModelList[index][0] && currentList.meanModelList[index][0] !== item.means"><icon  type="warn"></icon></p>
+                     <p class="item-right" v-show="currentList.meanModelList[index][0] && currentList.meanModelList[index][0] === item.means"><icon  type="success"></icon></p>
+                     <p class="item-right" v-show="currentList.meanModelList[index][0] && currentList.meanModelList[index][0] !== item.means"><icon  type="warn"></icon></p>
                    </div>
                  </div>
                
@@ -75,7 +78,7 @@
         <p class="box-center" :class="type === 1?'active' : ''" @click="play(1)">中英练习</p>
         <p class="box-center" :class="type === 2?'active' : ''" @click="play(2)">英中练习</p>
     </div>
-    <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup(index)" @on-show="showPopup(item,index)" @on-change="changeWordPopup(index)" v-model="popupValue">
+    <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup()" @on-show="showPopup()" @on-change="changeWordPopup()" v-model="popupValue">
       
     </popup-picker><!--只初始化一个-->
   </div>
@@ -184,7 +187,14 @@ export default {
           for(var i=0,len=that.list1.length;i<len;i++){
             var strLen = that.list1[i].length;
             if(o.substr(0,strLen) === that.list1[i]){
-              var wordObj = JSON.parse(words[o])
+              try{
+                var wordObj = JSON.parse(words[o])
+              
+              }catch(e){
+                console.log(e,words[o])
+                continue;
+              }
+
               wordObj.sentence = JSON.parse(wordObj.sentence)
               wordObj.symbols = JSON.parse(wordObj.symbols)
               wordObj.means = wordObj.symbols[0]["parts"][0].means.join(";")
@@ -273,10 +283,9 @@ export default {
         that.currentList = that.list2[that.list1[index]];
         console.log(that.currentList)
       },
-      showPopup : function(item,index){
-        console.log(index,item)
+      showPopup : function(){
       },
-      changeWordPopup : function(index){
+      changeWordPopup : function(){
         var that = this;
         if(that.type === 1){
           that.currentList.wordModelList[that.itemIndex] = that.popupValue;
@@ -309,6 +318,9 @@ export default {
   body{
     background-color:#fff;
   }
+  .num{
+    width:30px;
+  }
   ._v-content{
     height:100%;
   }
@@ -333,9 +345,16 @@ export default {
   .bot p{
     color:#3A3A3A;
     width:33%;
+    height:100%;
+    position:relative;
   }
-  .bot p +p{
-    border-left:1px solid #E7E7E7;
+  .bot p +p:before{
+    content:"";
+    position:absolute;
+    left:0;
+    height:70%;
+    width:1px;
+    background-color:#E7E7E7;
   }
   .bot p.active{
     color:#52A3E3;
@@ -423,6 +442,10 @@ export default {
   }
   .item-row .field-date{
     /*background:url(../assets/pencil.png) right center no-repeat;*/
+  }
+  .item-row .item-left{
+    width: 80%;
+    padding-left: 30px;
   }
   .notice{
     height:50px;
