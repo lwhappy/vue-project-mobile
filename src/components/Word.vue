@@ -2,7 +2,7 @@
   <div class="tab-container box-v-start align-stretch">
     <div class="tab-header">
       <tab :line-width=2 active-color='#52A3E3' v-model="swiperIndex">
-        <tab-item class="vux-center" :selected="key === firstKey" v-for="(value,key) in list2"  :key="key" badge-background="#38C972" badge-color="#fff" :badge-label="list2[key].list.length.toString()">{{key}}</tab-item>
+        <tab-item class="vux-center" :selected="index === swiperIndex" v-for="(value,index) in list1"  :key="index" badge-background="#38C972" badge-color="#fff" badge-label="0">{{value}}</tab-item>
       </tab>
     </div>  
     <div class="rest" style="overflow:auto">
@@ -11,54 +11,59 @@
           <!--<scroller class="scroll-wrapper" :on-refresh="refresh"
                :on-infinite="infiniteHandler"
                style="padding-top: 44px;">-->
-          <swiper-item v-for="(value,key) in list2" :key="key" :selected="key===firstKey">
-            
-            <div v-for="(item, index) in list2[key].list" :key="index" class="tab-swiper  bd-bottom">
-              <div v-show="type === 0" class="" >
-                <div  class="item-row item-row1">
-                  <p class="size1">
-                    <span class="color1">{{item.word_name}}</span>
-                    <span class="color2">[{{item.ph_am}}]</span>
-                  </p>
+          <swiper-item v-for="(value,outerIndex) in list1" :key="outerIndex" :selected="outerIndex===swiperIndex">
+            <div v-show="outerIndex !== swiperIndex"><loading :show="showLoading" text="Loading"></loading></div>
+            <div v-show="outerIndex === swiperIndex"> 
+              <div v-for="(item, index) in currentList.list" :key="index" class="tab-swiper  bd-bottom">
+                <div v-if="type === 0" class="" >
+                  <div  class="item-row item-row1">
+                    <p class="size1">
+                      <span class="color1">{{item.word_name}}</span>
+                      <span class="color2">[{{item.ph_am}}]</span>
+                    </p>
+                  </div>
+                  <div class="item-row item-row2">
+                    <p class="ellipsis color2 size2">{{item.means}}</p>
+                  </div>
                 </div>
-                <div class="item-row item-row2">
-                  <p class="ellipsis color2 size2">{{item.means}}</p>
-                </div>
+                 <div v-if="type === 1" >
+                   <div class="item-row item-row1">
+                    <p class="ellipsis color1 size1">{{item.means}}</p>
+                   </div>
+                   <div  class="box-justify item-row">
+                       
+                       <div class="color2 size2 box-justify">
+                          <p @click="showPopupPicker(index)">点击选择</p>
+                          <p>{{currentList.wordModelList[index][0]}}</p>
+                       </div>
+                       <!--<p style="display:none">{{wordModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
+                       
+                     <p v-show="currentList.wordModelList[index][0] && currentList.wordModelList[index][0] === item.word_name"><icon  type="success"></icon></p>
+                     <p v-show="currentList.wordModelList[index][0] && currentList.wordModelList[index][0] !== item.word_name"><icon  type="warn"></icon></p>
+                   </div>
+                   
+                 </div>
+                 <div v-if="type === 2" >
+                   <div  class="item-row item-row1">
+                     <p>
+                       <span>{{item.word_name}}</span>
+                       <span>[{{item.ph_am}}]</span>
+                     </p>
+                   </div>
+                   <div  class="box-justify item-row item-row2">
+                       <div class="color2 size2 box-justify">
+                          <p @click="showPopupPicker(index)">点击选择</p>
+                          <p>{{currentList.meanModelList[index][0]}}</p>
+                       </div>
+                       <!--<p style="display:none">{{meanModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
+                       
+                     <p v-show="currentList.meanModelList[index][0] && currentList.meanModelList[index][0] === item.means"><icon  type="success"></icon></p>
+                     <p v-show="currentList.meanModelList[index][0] && currentList.meanModelList[index][0] !== item.means"><icon  type="warn"></icon></p>
+                   </div>
+                 </div>
+               
+               
               </div>
-               <div v-show="type === 1" >
-                 <div class="item-row item-row1">
-                  <p class="ellipsis color1 size1">{{item.means}}</p>
-                 </div>
-                 <div  class="box-justify item-row">
-                   <group class="popup-picker-wrapper" >
-                     <popup-picker class="size2 color2" title="点击选择" :data="list2[key].wordList" @on-show="showPopup(item,index)" @on-change="changeWordPopup(key,index)" v-model="value.wordModelList[index]"></popup-picker>
-                     <!--<p style="display:none">{{wordModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
-                     
-                   </group>
-                   <p v-show="value.wordModelList[index][0] && value.wordModelList[index][0] === item.word_name"><icon  type="success"></icon></p>
-                   <p v-show="value.wordModelList[index][0] && value.wordModelList[index][0] !== item.word_name"><icon  type="warn"></icon></p>
-                 </div>
-                 
-               </div>
-               <div v-show="type === 2" >
-                 <div  class="item-row item-row1">
-                   <p>
-                     <span>{{item.word_name}}</span>
-                     <span>[{{item.ph_am}}]</span>
-                   </p>
-                 </div>
-                 <div  class="box-justify item-row item-row2">
-                   <group class="popup-picker-wrapper" >
-                     <popup-picker class="size2 color2" title="点击选择" :data="list2[key].meanList" @on-show="showPopup(item,index)" @on-change="changeMeanPopup(key,index)" v-model="value.meanModelList[index]"></popup-picker>
-                     <!--<p style="display:none">{{meanModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
-                     
-                   </group>
-                   <p v-show="value.meanModelList[index][0] && value.meanModelList[index][0] === item.means"><icon  type="success"></icon></p>
-                   <p v-show="value.meanModelList[index][0] && value.meanModelList[index][0] !== item.means"><icon  type="warn"></icon></p>
-                 </div>
-               </div>
-             
-             
             </div>
           </swiper-item>
           <!--</scroller>-->
@@ -70,6 +75,9 @@
         <p class="box-center" :class="type === 1?'active' : ''" @click="play(1)">中英练习</p>
         <p class="box-center" :class="type === 2?'active' : ''" @click="play(2)">英中练习</p>
     </div>
+    <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup(index)" @on-show="showPopup(item,index)" @on-change="changeWordPopup(index)" v-model="popupValue">
+      
+    </popup-picker><!--只初始化一个-->
   </div>
 </template>
 
@@ -115,10 +123,15 @@ export default {
       list2Clone:{},
       swiperIndex: 0,
       firstKey: '',
-
+      showLoading:true,
       asyncCount : 5,
       wordModelList : {},
       meanModelList : {},
+      currentList : [],
+      isShowPopupPicker : false,
+      popupValue : [""],
+      itemIndex : "",
+      popupData : [],
       /*english : {
         wordList : [[]],
         meanList : [[]],
@@ -133,7 +146,7 @@ export default {
     var name = that.$router.history.current.params.name;
     const api = 'static/cet4/cet4-'+name+'.js';
     that.list1 = config.all.words[name].tab;
-    that.firstKey = that.list1[0];
+    //that.firstKey = that.list1[0];
     //console.log(that.$router.history.current.params.name)
     for(var i = 0,len=that.list1.length;i<len;i++){
       /*that.list2[that.list1[i]] = {
@@ -188,6 +201,9 @@ export default {
         console.log(that.list2)
         that.list2Clone = Object.assign({},that.list2)
         console.log("that.list2Clone",that.list2Clone)
+        console.log(that.list1[0])
+        that.currentList = that.list2[that.list1[0]]
+        console.log("that.currentList",that.currentList)
         that.$vux.loading.hide()
 
       })
@@ -195,6 +211,15 @@ export default {
     
   },
   methods: {
+      hidePopup : function(){
+        var that = this;
+        that.isShowPopupPicker = false;
+      },
+      showPopupPicker : function(index){
+        var that = this;
+        that.isShowPopupPicker = true;
+        that.itemIndex = index;
+      },
       play : function(type){
         var that =  this;
         that.type = type;
@@ -204,49 +229,69 @@ export default {
             
             break;
           case 1:
-            for(var o in that.list2){
+            /*for(var o in that.list2){
               that.list2[o].wordList[0].sort(function(){
                 return .5 - Math.random();
               })
               that.list2[o].wordModelList = Object.assign([],that.list2Clone[o].wordModelList)
               
-            }
-            that.wordModelList = {}
+            }*/
+            console.log(that.list2[that.list1[that.swiperIndex]].wordList[0])
+            /*for(var i=0,len=that.currentList.wordModelList.length;i<len;i++){
+              that.currentList.wordModelList[i] = [that.list2[that.list1[that.swiperIndex]].wordList[0][i]];
+            }*/
+            that.currentList.wordModelList = that.list2[that.list1[that.swiperIndex]].wordModelList
+            that.currentList.wordModelList.sort(function(){
+              return .5 -Math.random()
+            })
+            console.log("that.currentList",that.currentList)
+            that.popupData = that.currentList.wordList;
             break;
            case 2:
-            for(var o in that.list2){
+            /*for(var o in that.list2){
               that.list2[o].meanList[0].sort(function(){
                 return .5 - Math.random();
               })
               that.list2[o].meanModelList = Object.assign([],that.list2Clone[o].meanModelList)
-            }
+            }*/
             console.log("that.list2",that.list2)
             console.log("that.list2Clone",that.list2Clone)
-            that.meanModelList = {}
+            that.currentList.meanModelList = that.list2[that.list1[that.swiperIndex]].meanModelList
+            that.currentList.meanModelList.sort(function(){
+              return .5 -Math.random()
+            })
+            that.popupData = that.currentList.meanList;
             break;
         }
 
       },
-      changeSwiper : function(){
+      changeSwiper : function(index){
         var that = this
+        that.swiperIndex = index;
         console.log(that.swiperIndex)
         that.wordModelList = {}
+        that.currentList = that.list2[that.list1[index]];
+        console.log(that.currentList)
       },
       showPopup : function(item,index){
         console.log(index,item)
       },
-      changeWordPopup : function(key,index){
+      changeWordPopup : function(index){
         var that = this;
-        console.log("that.list2[key].wordModelList[index]",that.list2[key].wordModelList[index])
-        var wordModelList = Object.assign([],that.list2[key].wordModelList[index])
-        Vue.set(that.wordModelList, index, wordModelList)//没有这行popup-picker的v-model视图不能更新
+        if(that.type === 1){
+          that.currentList.wordModelList[that.itemIndex] = that.popupValue;
+        }
+        else if(that.type === 2){
+          that.currentList.meanModelList[that.itemIndex] = that.popupValue;
+        }
+        
         console.log("that.list2",that.list2)
         console.log("that.list2Clone",that.list2Clone)
       },
-      changeMeanPopup : function(key,index){
+      changeMeanPopup : function(index){
         var that = this;
 
-        var meanModelList = Object.assign([],that.list2[key].meanModelList[index])
+        var meanModelList = Object.assign([],that.currentList.meanModelList[index])
         Vue.set(that.meanModelList, index, meanModelList)//没有这行popup-picker的v-model视图不能更新
         console.log("that.list2",that.list2)
         console.log("that.list2Clone",that.list2Clone)
