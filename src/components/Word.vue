@@ -207,19 +207,20 @@ export default {
             }
           }
         }
-        console.log(that.list2)
+        for(var o in that.list2){
+          that.list2[o].wordList[0].sort(function(){
+            return .5 -Math.random()
+          })
+          that.list2[o].meanList[0].sort(function(){
+            return .5 -Math.random()
+          })
+        }
+        console.log("that.list2",that.list2)
         that.list2Clone = Object.assign({},that.list2)
         console.log("that.list2Clone",that.list2Clone)
-        console.log(that.list1[0])
         that.currentList = that.list2[that.list1[0]]
         that.currentList.wordList = that.list2[that.list1[that.swiperIndex]].wordList
-        that.currentList.wordList[0].sort(function(){
-          return .5 -Math.random()
-        })
         that.currentList.meanList = that.list2[that.list1[that.swiperIndex]].meanList
-        that.currentList.meanList[0].sort(function(){
-          return .5 -Math.random()
-        })
         console.log("that.currentList",that.currentList)
         that.$vux.loading.hide()
 
