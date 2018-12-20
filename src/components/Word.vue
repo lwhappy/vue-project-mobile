@@ -78,7 +78,7 @@
         <p class="box-center" :class="type === 1?'active' : ''" @click="play(1)">中英练习</p>
         <p class="box-center" :class="type === 2?'active' : ''" @click="play(2)">英中练习</p>
     </div>
-    <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup()" @on-show="showPopup()" @on-change="changeWordPopup()" v-model="popupValue">
+    <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup()" @on-show="showPopup()" @on-change="changeWordPopup()" v-model="popupValue" :popup-title="popupTitle">
       
     </popup-picker><!--只初始化一个-->
   </div>
@@ -128,13 +128,12 @@ export default {
       firstKey: '',
       showLoading:true,
       asyncCount : 5,
-      wordModelList : {},
-      meanModelList : {},
       currentList : [],
       isShowPopupPicker : false,
       popupValue : [""],
       itemIndex : "",
       popupData : [],
+      popupTitle : "",
       /*english : {
         wordList : [[]],
         meanList : [[]],
@@ -213,6 +212,14 @@ export default {
         console.log("that.list2Clone",that.list2Clone)
         console.log(that.list1[0])
         that.currentList = that.list2[that.list1[0]]
+        that.currentList.wordList = that.list2[that.list1[that.swiperIndex]].wordList
+        that.currentList.wordList[0].sort(function(){
+          return .5 -Math.random()
+        })
+        that.currentList.meanList = that.list2[that.list1[that.swiperIndex]].meanList
+        that.currentList.meanList[0].sort(function(){
+          return .5 -Math.random()
+        })
         console.log("that.currentList",that.currentList)
         that.$vux.loading.hide()
 
@@ -229,47 +236,29 @@ export default {
         var that = this;
         that.isShowPopupPicker = true;
         that.itemIndex = index;
+        if(that.type === 1){
+          that.popupTitle = that.currentList.list[that.itemIndex].means;
+        }
+        else if(that.type === 2){
+          that.popupTitle = that.currentList.list[that.itemIndex].word_name;
+        }
+        console.log(that.popupTitle)
+        
       },
       play : function(type){
         var that =  this;
         that.type = type;
-        that.list2 = Object.assign({},that.list2Clone)
         switch(type){
           case 0:
             
             break;
           case 1:
-            /*for(var o in that.list2){
-              that.list2[o].wordList[0].sort(function(){
-                return .5 - Math.random();
-              })
-              that.list2[o].wordModelList = Object.assign([],that.list2Clone[o].wordModelList)
-              
-            }*/
-            console.log(that.list2[that.list1[that.swiperIndex]].wordList[0])
-            /*for(var i=0,len=that.currentList.wordModelList.length;i<len;i++){
-              that.currentList.wordModelList[i] = [that.list2[that.list1[that.swiperIndex]].wordList[0][i]];
-            }*/
-            that.currentList.wordModelList = that.list2[that.list1[that.swiperIndex]].wordModelList
-            that.currentList.wordModelList.sort(function(){
-              return .5 -Math.random()
-            })
-            console.log("that.currentList",that.currentList)
+            
             that.popupData = that.currentList.wordList;
             break;
            case 2:
-            /*for(var o in that.list2){
-              that.list2[o].meanList[0].sort(function(){
-                return .5 - Math.random();
-              })
-              that.list2[o].meanModelList = Object.assign([],that.list2Clone[o].meanModelList)
-            }*/
-            console.log("that.list2",that.list2)
-            console.log("that.list2Clone",that.list2Clone)
-            that.currentList.meanModelList = that.list2[that.list1[that.swiperIndex]].meanModelList
-            that.currentList.meanModelList.sort(function(){
-              return .5 -Math.random()
-            })
+           
+            
             that.popupData = that.currentList.meanList;
             break;
         }
@@ -279,7 +268,6 @@ export default {
         var that = this
         that.swiperIndex = index;
         console.log(that.swiperIndex)
-        that.wordModelList = {}
         that.currentList = that.list2[that.list1[index]];
         console.log(that.currentList)
       },
@@ -361,6 +349,12 @@ export default {
   }
   html body .vux-tab .vux-tab-item{
     font-size:16px;
+  }
+  .vux-popup-header-title{
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 0 5px;
   }
 </style>
 <style lang="less" scoped>
