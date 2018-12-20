@@ -270,6 +270,20 @@ export default {
         console.log(that.swiperIndex)
         that.currentList = that.list2[that.list1[index]];
         console.log(that.currentList)
+        switch(that.type){
+          case 0:
+            
+            break;
+          case 1:
+            
+            that.popupData = that.currentList.wordList;
+            break;
+           case 2:
+           
+            
+            that.popupData = that.currentList.meanList;
+            break;
+        }
       },
       showPopup : function(){
       },
