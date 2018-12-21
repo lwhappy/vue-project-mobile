@@ -16,4 +16,7 @@ export default {
 body {
   background-color: #fbf9fe;
 }
+#app{
+	font-family:"Helvetica Neue",Helvetica,Arial,"Hiragino Sans GB","WenQuanYi Micro Hei","Microsoft YaHei",sans-serif;
+}
 </style>
