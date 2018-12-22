@@ -32,7 +32,7 @@
                     <p class="ellipsis color2 size2 item-left">{{item.means}}</p>
                   </div>
                 </div>
-                 <div class="type1" v-if="type === 1" @click="showPopupPicker(index)">
+                 <div class="type1" v-if="type === 1" @click="showPopupPicker(index,item.word_name)">
                    <div class="item-row item-row1 box-start">
                     <p class="num color3 ">{{index + 1}}.</p>
                     <p class="ellipsis color1 size1 rest">{{item.means}}</p>
@@ -50,7 +50,7 @@
                    </div>
                    
                  </div>
-                 <div class="type2" v-if="type === 2" @click="showPopupPicker(index)">
+                 <div class="type2" v-if="type === 2" @click="showPopupPicker(index,item.means)">
                    <div  class="item-row item-row1 box-start">
                      <p class="num color3 ">{{index + 1}}.</p>
                      <p class="color1 en-size1">{{item.word_name}}</p>
@@ -239,9 +239,9 @@ export default {
         var that = this;
         that.isShowPopupPicker = false;
       },
-      showPopupPicker : function(index){
+      showPopupPicker : function(index,value){
         var that = this;
-        that.isShowPopupPicker = true;
+        
         that.itemIndex = index;
         if(that.type === 1){
           that.popupTitle = that.currentList.list[that.itemIndex].means;
@@ -250,6 +250,28 @@ export default {
           that.popupTitle = that.currentList.list[that.itemIndex].word_name;
         }
         console.log(that.popupTitle)
+        that.popupData[0].sort(function(){
+            return .5 -Math.random()
+        })
+        var newData = that.popupData[0].slice(0,10);
+
+        var isFind = false;
+        for(var i=0,len=newData.length;i<len;i++){
+          if(newData[i] === value){
+            isFind = true;
+            break;
+          }
+        }
+        if(!isFind){
+          newData[newData.length-1] = value;
+        }
+        newData.sort(function(){
+            return .5 -Math.random()
+        })
+        //that.popupData[0] = newData;
+        Vue.set(that.popupData, 0, newData)
+        that.isShowPopupPicker = true;
+
         
       },
       play : function(type){
