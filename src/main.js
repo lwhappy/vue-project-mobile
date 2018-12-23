@@ -26,8 +26,9 @@ const routes = [
   		component: AlertDemo
 	},*/
   {
-      path: '/word/:name',
-      component: Word
+      path: '/word/:name/:type',
+      component: Word,
+      name :"word"
   },
   /*{
       path: '/w',
