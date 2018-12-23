@@ -28,11 +28,17 @@
                         <p class="color2 size2 ellipsis rest">&nbsp;&nbsp;美&nbsp;[{{item.ph_am}}] </p>
                     </div>
                   </div>
-                  <div class="item-row item-row2">
-                    <p class="ellipsis color2 size2 item-left">{{item.means}}</p>
+                  <div class="item-row item-row2 ">
+                    
+                    <div class="item-left">
+                      <p class="ellipsis color2 size2 ">{{item.means}}</p>
+                      <p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
+                      <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
+                      <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_cn}}</p>
+                    </div>
                   </div>
                 </div>
-                 <div class="type1" v-if="type === 1" @click="showPopupPicker(index,item.word_name)">
+                 <div class="type1" v-if="type === 1" >
                    <div class="item-row item-row1 box-start">
                     <p class="num color3 ">{{index + 1}}.</p>
                     <p class="ellipsis color1 size1 rest">{{item.means}}</p>
@@ -40,8 +46,11 @@
                    <div  class="box-justify item-row" >
                        
                        <div class="color2  box-justify item-left" >
-                          <p class="size2" v-show="!value.wordModelList[index][0]" >点击选择</p>
-                          <p class="size1">{{value.wordModelList[index][0]}}</p>
+                          <p class="input-wrapper vux-1px">
+                             <input class=" input box-center size1" :readonly="(value.wordModelList[index][0] && value.wordModelList[index][0] === item.word_name) ? true : false" type="text" v-model="list2[key].wordModelList[index][0]">
+                          </p>
+                          <p @click="showPopupPicker(index,item.word_name)" class="size2" v-show="!value.wordModelList[index][0] || (value.wordModelList[index][0] && value.wordModelList[index][0] !== item.word_name)" >点击选择</p>
+                          <!--<p class="size1">{{value.wordModelList[index][0]}}</p>-->
                        </div>
                        <!--<p style="display:none">{{wordModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
                        
@@ -76,13 +85,13 @@
         </swiper>
       
     </div>
-    <div class="bot box-justify color2 size2">
+    <!--<div class="bot box-justify color2 size2">
         <p class="box-center" :class="type === 0?'active' : ''" @click="play(0)" >学习模式</p>
         <p class="apart-line vux-1px-l"></p>
         <p class="box-center" :class="type === 1?'active' : ''" @click="play(1)">中英练习</p>
         <p class="apart-line vux-1px-l"></p>
         <p class="box-center" :class="type === 2?'active' : ''" @click="play(2)">英中练习</p>
-    </div>
+    </div>-->
     <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup()" @on-show="showPopup()" @on-change="changeWordPopup()" v-model="popupValue" :popup-title="popupTitle">
       
     </popup-picker><!--只初始化一个-->
@@ -124,7 +133,7 @@ export default {
   },
   data () {
     return {
-      type : 0,
+      type : Number(this.$route.params.type) || 0,
       index01: 0,
       list1: [],
       list2: {},
@@ -149,6 +158,7 @@ export default {
     }
   },
   created(){
+    console.log("type",this.type)
     var that = this;
     var name = that.$router.history.current.params.name;
     const api = 'static/cet4/cet4-'+name+'.js';
@@ -200,16 +210,20 @@ export default {
               }
 
               wordObj.sentence = JSON.parse(wordObj.sentence)
+              wordObj.showSentence = false
               wordObj.symbols = JSON.parse(wordObj.symbols)
-              wordObj.means = wordObj.symbols[0]["parts"][0].means.join(";")
+              wordObj.means = wordObj.symbols[0]["parts"][0].part + wordObj.symbols[0]["parts"][0].means.join(";")
               wordObj.ph_am = wordObj.symbols[0].ph_am
               wordObj.ph_en = wordObj.symbols[0].ph_en
               that.list2[that.list1[i]].list.push(wordObj)
               that.list2[that.list1[i]].wordList[0].push(wordObj.word_name)
               that.list2[that.list1[i]].meanList[0].push(wordObj.means)
               var l = that.list2[that.list1[i]].meanList[0].length;
-              that.list2[that.list1[i]].wordModelList[l-1]=['']
-              that.list2[that.list1[i]].meanModelList[l-1]=['']
+              //that.list2[that.list1[i]].wordModelList[l-1]=['']
+              //that.list2[that.list1[i]].meanModelList[l-1]=['']
+
+              Vue.set(that.list2[that.list1[i]].wordModelList, l-1, [''])
+              Vue.set(that.list2[that.list1[i]].meanModelList, l-1, [''])
             }
           }
         }
@@ -228,6 +242,21 @@ export default {
         that.currentList.wordList = that.list2[that.list1[that.swiperIndex]].wordList
         that.currentList.meanList = that.list2[that.list1[that.swiperIndex]].meanList
         console.log("that.currentList",that.currentList)
+
+        switch(that.type){
+          case 0:
+            
+            break;
+          case 1:
+            
+            that.popupData = that.currentList.wordList;
+            break;
+           case 2:
+           
+            
+            that.popupData = that.currentList.meanList;
+            break;
+        }
         that.$vux.loading.hide()
 
       })
@@ -335,6 +364,9 @@ export default {
         Vue.set(that.meanModelList, index, meanModelList)//没有这行popup-picker的v-model视图不能更新
         console.log("that.list2",that.list2)
         console.log("that.list2Clone",that.list2Clone)
+      },
+      showSentence : function(item){
+        item.showSentence = !item.showSentence;
       }
 
    
@@ -485,7 +517,25 @@ export default {
   .item-row .field-date{
     /*background:url(../assets/pencil.png) right center no-repeat;*/
   }
-  
+  .item-row .input-wrapper{
+    height:24px;
+    width:70%;
+    display:block;
+    width:70%;
+  }
+  .item-row .input-wrapper .input{
+    background:none;
+    border:none;
+    padding-left:6px;
+    width:100%;
+    height:100%;
+    position:absolute;
+    z-index:10;
+
+  }
+  .item-row .input-wrapper .input:focus{
+    outline:none;
+  }
   .type0 .item-row .item-left{
     padding-right:10px;
     padding-left:30px;
