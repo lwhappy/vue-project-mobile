@@ -25,16 +25,19 @@
                     <div class="size1 box-start">
                         <p class="num color3 box-end">{{index + 1}}.</p>
                         <p class="color1 en-size1">{{item.word_name}}</p>
-                        <p class="color2 size2 ellipsis rest">&nbsp;&nbsp;美&nbsp;[{{item.ph_am}}] </p>
+                       
+                        <p class="color2 size3 ellipsis rest">&nbsp;&nbsp;英&nbsp;[{{item.ph_en}}] </p>
                     </div>
                   </div>
                   <div class="item-row item-row2 ">
                     
                     <div class="item-left">
                       <p class="ellipsis color2 size2 ">{{item.means}}</p>
-                      <p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
+                      <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
                       <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
-                      <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_cn}}</p>
+                      <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_cn}}</p>-->
+                      <p  class="sentence sentence1 color3 size3">{{item.sentence.Network_en}}</p>
+                      <p  class="sentence sentence2 color3 size3">{{item.sentence.Network_cn}}</p>
                     </div>
                   </div>
                 </div>
@@ -108,7 +111,7 @@ import axios from 'axios';
 import config from '../js/cet4/config.js';
 console.log("config",config)
 
-import { Tab, TabItem, Sticky, Divider, XButton, Swiper, SwiperItem, Datetime, Selector, Marquee, MarqueeItem, Toast , PopupPicker , ButtonTab, ButtonTabItem,Icon ,Loading} from 'vux'
+import { Tab, TabItem, Sticky, Divider, XButton, Swiper, SwiperItem, Datetime, Selector, Marquee, MarqueeItem, Toast , PopupPicker , ButtonTab, ButtonTabItem,Icon ,Loading,Popover } from 'vux'
 
 
 export default {
@@ -129,7 +132,8 @@ export default {
     ButtonTab, 
     ButtonTabItem,
     Icon ,
-    Loading
+    Loading,
+    Popover 
   },
   data () {
     return {
@@ -282,7 +286,7 @@ export default {
         that.popupData[0].sort(function(){
             return .5 -Math.random()
         })
-        var newData = that.popupData[0].slice(0,10);
+        var newData = that.popupData[0].slice(0,6);
 
         var isFind = false;
         for(var i=0,len=newData.length;i<len;i++){
@@ -425,6 +429,9 @@ export default {
     text-overflow: ellipsis;
     padding: 0 5px;
   }
+  html body .vux-popover .popover-content{
+    padding:3px 6px;
+  }
 </style>
 <style lang="less" scoped>
 @import '~vux/src/styles/1px.less';
@@ -438,12 +445,16 @@ export default {
   line-height: normal;
 }
  .size1{
-  font-size:16px;
- }
- .en-size1{
   font-size:18px;
  }
+ .en-size1{
+  font-size:20px;
+  font-weight:600;
+ }
  .size2{
+  font-size:16px;
+ }
+ .size3{
   font-size:14px;
  }
   .color1{
@@ -453,7 +464,7 @@ export default {
     color:#565454;
   }
   .color3{
-    color:#B6B6B6;
+    color:#908e8e;
   }
   h1{
     height:30px;
@@ -495,7 +506,7 @@ export default {
   }
   
   .item-row1{
-    margin-bottom:5px;
+    /*margin-bottom:5px;*/
   }
   .item-operate{
     width:100%;
@@ -518,7 +529,7 @@ export default {
     /*background:url(../assets/pencil.png) right center no-repeat;*/
   }
   .item-row .input-wrapper{
-    height:24px;
+    height:30px;
     width:70%;
     display:block;
     width:70%;
@@ -540,6 +551,13 @@ export default {
     padding-right:10px;
     padding-left:30px;
     width:auto;
+  }
+  .type0 .item-row .item-left .sentence{
+    line-height:20px;
+  }
+  .type0 .item-row .item-left .sentence1{
+      padding:5px 0;
+      
   }
   .type1 .item-row .item-left,.type2 .item-row .item-left{
     width: 80%;
