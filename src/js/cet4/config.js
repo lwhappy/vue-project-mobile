@@ -6,6 +6,8 @@ var obj = {
 				ab : ["abo","absen","abso","abu"],
 				ac : ["aca","acce","acci","acco","accu","ach","acq","acr","act"],
 				ap : ["apart","apolo","appar","appe","appli"],
+				ar :["arm","arg","ari","arou","arr","art"],
+				at : ["atm","ato","atta","atte","attra","attri"]
 			}
       		
 		},

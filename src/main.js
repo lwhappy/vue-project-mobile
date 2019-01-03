@@ -30,6 +30,7 @@ const routes = [
       component: Word,
       name :"word"
   },
+  
   /*{
       path: '/w',
       component: WordIndex

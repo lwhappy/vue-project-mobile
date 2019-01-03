@@ -24,7 +24,7 @@
                   <div  class="item-row item-row1">
                     <div class="size1 box-start">
                         <p class="num color3 box-end">{{index + 1}}.</p>
-                        <p class="color1 en-size1">{{item.word_name}}</p>
+                        <p class="color1 en-size1" v-html="wordColor(item.word_name,searchInputValue)"></p>
                        
                         <p class="color2 size3 ellipsis rest">&nbsp;&nbsp;英&nbsp;[{{item.ph_en}}] </p>
                     </div>
@@ -106,7 +106,7 @@
         <div class="box-end rest" v-show="isSearch">
           <p @click="searchAll">全部</p>
           <p class="input-wrapper vux-1px">
-            <input  type="text" />
+            <input v-model="searchInputValue" type="text" />
           </p>
           <p @click.stop.prevent="showSearchPicker">选择</p>
         </div>
@@ -173,6 +173,7 @@ export default {
       searchData : [],
       searchValue : [""],
       group : {},
+      searchInputValue : "",
       /*english : {
         wordList : [[]],
         meanList : [[]],
@@ -181,6 +182,26 @@ export default {
       popupValue : [""]*/
 
     }
+  },
+  watch : {
+    searchInputValue : function(val,oldVal){
+      var that = this;
+      console.log(val)
+      that.currentList.list = that.currentListClone.list;
+      if(val){
+        
+        var list = [];
+        for(var i=0,len=that.currentList.list.length;i<len;i++){
+          if(that.currentList.list[i].word_name.match(val) !== null){
+            list.push(that.currentList.list[i]);
+          }
+        }
+        that.currentList.list = list;
+      }
+    }
+  },
+  filters : {
+    
   },
   created(){
     console.log("type",this.type)
@@ -293,6 +314,28 @@ export default {
     
   },
   methods: {
+      wordColor : function(a,b) {
+        if(b){
+          if(a.match("b") !== null){
+            var index = a.indexOf(b);
+            var str1 = a.substring(0,index );
+            if(str1){
+              str1 = "<span>" + str1 + "</span>";
+            }
+            var str2 = a.substring(index+b.length);
+            if(str2){
+              str2 = "<span>" + str2 + "</span>"
+            }
+            b = '<span class="search-word-color">' + b + '</span>';
+            var word = str1 +b + str2;
+            console.log(word)
+            return word;
+          }
+        }
+        else {
+          return a;
+        }
+      },
       searchAll : function(){
         var that = this;
         that.currentList.list = that.currentListClone.list;
@@ -373,6 +416,7 @@ export default {
         var that = this;
         that.isSearch = false;
         that.isSearchPicker = false;
+        that.searchInputValue = "";
         console.log("that.list2Clone",that.list2Clone)
         that.currentList.list = Object.assign([],that.currentListClone.list);
         that.swiperIndex = index;
@@ -400,15 +444,16 @@ export default {
       changeSearchPopup : function(){
         var that = this;
         console.log("that.searchValue",that.searchValue)
-        
-        that.currentList.list = that.currentListClone.list;
+        that.searchInputValue = that.searchValue[0]
+
+        /*that.currentList.list = that.currentListClone.list;
         var list = [];
         for(var i=0,len=that.currentList.list.length;i<len;i++){
           if(that.currentList.list[i].word_name.match(that.searchValue[0]) !== null){
             list.push(that.currentList.list[i]);
           }
         }
-        that.currentList.list = list;
+        that.currentList.list = list;*/
       },
       changeWordPopup : function(){
         var that = this;
@@ -498,6 +543,9 @@ export default {
   }
   .vux-swiper-item .tab-swiper:last-of-type{
     margin-bottom:50px;
+  }
+  .search-word-color{
+    color:blue;
   }
 </style>
 <style lang="less" scoped>
