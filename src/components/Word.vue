@@ -10,7 +10,7 @@
         </tab-item>
       </tab>
     </div>  
-    <div class="rest" style="overflow:auto">
+    <div class="rest" style="overflow:auto;">
       
         <swiper v-model="swiperIndex" height="100%" :show-dots="false" @on-index-change="changeSwiper">
           <!--<scroller class="scroll-wrapper" :on-refresh="refresh"
@@ -98,6 +98,21 @@
     <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup()" @on-show="showPopup()" @on-change="changeWordPopup()" v-model="popupValue" :popup-title="popupTitle">
       
     </popup-picker><!--只初始化一个-->
+    <popup-picker style="display:none"  class="size2 color2" :show="isSearchPicker" title="点击选择" :data="searchData"  @on-hide="hideSearchPopup()" @on-show="showPopup()" @on-change="changeSearchPopup()" v-model="searchValue" >
+      
+    </popup-picker>
+    <div v-show="type === 0" id="search-wrapper" :class="isSearch?'search-wrapper vux-1px-t' : ''">
+      <div class="box-end search">
+        <div class="box-end rest" v-show="isSearch">
+          <p @click="searchAll">全部</p>
+          <p class="input-wrapper vux-1px">
+            <input  type="text" />
+          </p>
+          <p @click.stop.prevent="showSearchPicker">选择</p>
+        </div>
+        <div @click.stop="showSearch"><icon  type="search"></icon></div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -147,11 +162,17 @@ export default {
       showLoading:true,
       asyncCount : 5,
       currentList : [],
+      currentListClone : [],
       isShowPopupPicker : false,
       popupValue : [""],
       itemIndex : "",
       popupData : [],
       popupTitle : "",
+      isSearch : false,
+      isSearchPicker : false,
+      searchData : [],
+      searchValue : [""],
+      group : {},
       /*english : {
         wordList : [[]],
         meanList : [[]],
@@ -167,6 +188,9 @@ export default {
     var name = that.$router.history.current.params.name;
     const api = 'static/cet4/cet4-'+name+'.js';
     that.list1 = config.all.words[name].tab;
+    that.group = config.all.words[name].group;
+    that.searchData = [ that.group[that.list1[that.swiperIndex]]];
+    console.log("that.searchData",that.searchData)
     //that.firstKey = that.list1[0];
     //console.log(that.$router.history.current.params.name)
     for(var i = 0,len=that.list1.length;i<len;i++){
@@ -261,6 +285,7 @@ export default {
             that.popupData = that.currentList.meanList;
             break;
         }
+        that.currentListClone = Object.assign({},that.currentList);
         that.$vux.loading.hide()
 
       })
@@ -268,9 +293,27 @@ export default {
     
   },
   methods: {
+      searchAll : function(){
+        var that = this;
+        that.currentList.list = that.currentListClone.list;
+      },
+      showSearch : function(){
+        console.log("00")
+        var that = this;
+        that.isSearch = !that.isSearch;
+      },
       hidePopup : function(){
         var that = this;
         that.isShowPopupPicker = false;
+      },
+      hideSearchPopup : function(){
+        var that = this;
+        that.isSearchPicker = false;
+      },
+      showSearchPicker : function(){
+        var that = this;
+        that.isSearchPicker = true;
+        that.searchData = [ that.group[that.list1[that.swiperIndex]]];
       },
       showPopupPicker : function(index,value){
         var that = this;
@@ -327,10 +370,15 @@ export default {
 
       },
       changeSwiper : function(index){
-        var that = this
+        var that = this;
+        that.isSearch = false;
+        that.isSearchPicker = false;
+        console.log("that.list2Clone",that.list2Clone)
+        that.currentList.list = Object.assign([],that.currentListClone.list);
         that.swiperIndex = index;
         console.log(that.swiperIndex)
         that.currentList = that.list2[that.list1[index]];
+        that.currentListClone = Object.assign({},that.currentList);
         console.log(that.currentList)
         switch(that.type){
           case 0:
@@ -348,6 +396,19 @@ export default {
         }
       },
       showPopup : function(){
+      },
+      changeSearchPopup : function(){
+        var that = this;
+        console.log("that.searchValue",that.searchValue)
+        
+        that.currentList.list = that.currentListClone.list;
+        var list = [];
+        for(var i=0,len=that.currentList.list.length;i<len;i++){
+          if(that.currentList.list[i].word_name.match(that.searchValue[0]) !== null){
+            list.push(that.currentList.list[i]);
+          }
+        }
+        that.currentList.list = list;
       },
       changeWordPopup : function(){
         var that = this;
@@ -432,11 +493,46 @@ export default {
   html body .vux-popover .popover-content{
     padding:3px 6px;
   }
+  .weui-icon-search{
+    font-size:24px;
+  }
+
 </style>
 <style lang="less" scoped>
 @import '~vux/src/styles/1px.less';
 @import '~vux/src/styles/center.less';
 @import '../css/common.css';
+
+#search-wrapper{
+  position:fixed;
+  right:0;
+  bottom:0;
+  width:100%;
+  
+  padding:10px 0;
+}
+.search-wrapper{
+  background-color:#fff;
+}
+#search-wrapper .search{
+  width:100%;
+}
+#search-wrapper .input-wrapper{
+  width:60%;
+  height:30px;
+  position:relative;
+  margin-right:10px;
+  margin-left:10px;
+}
+#search-wrapper input{
+  background: none;
+  border: none;
+  padding-left: 6px;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  z-index: 10;
+}
 .num{
   width:25px;
   font-size:13px;
@@ -574,6 +670,7 @@ export default {
     position:static;
     
   }
+  
   .vux-slider > .vux-swiper > .vux-swiper-item{
     overflow-x:hidden;
     overflow-y:auto;

@@ -2,6 +2,11 @@ var obj = {
 	words : {
 		a : {
 			tab : ['ab','ac','ap','ar','at' ],
+			group : {
+				ab : ["abo","absen","abso","abu"],
+				ac : ["aca","acce","acci","acco","accu","ach","acq","acr","act"],
+				ap : ["apart","apolo","appar","appe","appli"],
+			}
       		
 		},
 		b : {
