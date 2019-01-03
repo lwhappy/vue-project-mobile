@@ -496,7 +496,9 @@ export default {
   .weui-icon-search{
     font-size:24px;
   }
-
+  .vux-swiper-item .tab-swiper:last-of-type{
+    margin-bottom:50px;
+  }
 </style>
 <style lang="less" scoped>
 @import '~vux/src/styles/1px.less';
