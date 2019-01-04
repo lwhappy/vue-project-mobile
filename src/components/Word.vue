@@ -98,19 +98,34 @@
     <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup()" @on-show="showPopup()" @on-change="changeWordPopup()" v-model="popupValue" :popup-title="popupTitle">
       
     </popup-picker><!--只初始化一个-->
-    <popup-picker style="display:none"  class="size2 color2" :show="isSearchPicker" title="点击选择" :data="searchData"  @on-hide="hideSearchPopup()" @on-show="showPopup()" @on-change="changeSearchPopup()" v-model="searchValue" >
+   
       
     </popup-picker>
-    <div v-show="type === 0" id="search-wrapper" :class="isSearch?'search-wrapper vux-1px-t' : ''">
-      <div class="box-end search">
-        <div class="box-justify  search-left" v-show="isSearch">
-          <p @click="searchAll">全部</p>
-          <p class="input-wrapper vux-1px">
-            <input v-model="searchInputValue" type="text" />
-          </p>
-          <p @click.stop.prevent="showSearchPicker">选择</p>
+   
+    <div id="right" class="" v-show="type === 0">
+      <div class="inner-right box-start align-stretch">
+        <div class="box-center">
+          <x-icon v-show="!isShowRight" @click="isShowRight = true" style="margin-right:-9px" type="ios-arrow-left" size="30"></x-icon>
+          <x-icon v-show="isShowRight" @click="isShowRight = false" style="margin-right:-9px" type="ios-arrow-right" size="30"></x-icon>
         </div>
-        <div @click.stop="showSearch"><icon  type="search"></icon></div>
+        <div v-show="isShowRight" class="vux-1px-l right-bd"></div>
+        <div v-show="isShowRight" class="rest  right-content">
+          <div>
+            <group>
+              <x-input readonly="readonly" style="font-size:18px;padding-left:10px" text-align="left" v-model="searchInputValue" placeholder="字母组合"></x-input>
+            </group>
+            <div class="keybord">
+              <p @click="getKey(item)"  v-for="(item, index) in keybord" :key="index">{{item.toLowerCase()}}</p>
+            </div>
+          </div>
+          <div class="recommend-wrapper">
+            <p class="title">推荐：</p>
+            <div class="recommend">
+              <p @click="searchAll">全部</p>
+              <p @click="wordFilter(item)"  v-for="(item, index) in searchData" :key="index">{{item}}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -120,13 +135,11 @@
 
 <script>
 import Vue from 'vue'
-import VueScroller from 'vue-scroller'
-Vue.use(VueScroller)  
 import axios from 'axios';
 import config from '../js/cet4/config.js';
 console.log("config",config)
 
-import { Tab, TabItem, Sticky, Divider, XButton, Swiper, SwiperItem, Datetime, Selector, Marquee, MarqueeItem, Toast , PopupPicker , ButtonTab, ButtonTabItem,Icon ,Loading,Popover } from 'vux'
+import { Tab, TabItem, Sticky, Divider, XButton, Swiper, SwiperItem, Datetime, Selector, Marquee, MarqueeItem, Toast , PopupPicker , ButtonTab, ButtonTabItem,Icon ,Loading,Popover,XInput } from 'vux'
 
 
 export default {
@@ -148,7 +161,8 @@ export default {
     ButtonTabItem,
     Icon ,
     Loading,
-    Popover 
+    Popover,
+    XInput 
   },
   data () {
     return {
@@ -174,6 +188,10 @@ export default {
       searchValue : [""],
       group : {},
       searchInputValue : "",
+      keybord:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"],
+      isShowRight : false,
+      readonly : true,
+               
       /*english : {
         wordList : [[]],
         meanList : [[]],
@@ -210,7 +228,7 @@ export default {
     const api = 'static/cet4/cet4-'+name+'.js';
     that.list1 = config.all.words[name].tab;
     that.group = config.all.words[name].group;
-    that.searchData = [ that.group[that.list1[that.swiperIndex]]];
+    that.searchData = that.group[that.list1[that.swiperIndex]];
     console.log("that.searchData",that.searchData)
     //that.firstKey = that.list1[0];
     //console.log(that.$router.history.current.params.name)
@@ -314,6 +332,15 @@ export default {
     
   },
   methods: {
+      getKey:function(key){
+        var that = this;
+        key = key.toLowerCase();
+        that.searchInputValue += key;
+      },
+      wordFilter : function(matchStr){
+        var that = this;
+        that.searchInputValue = matchStr;
+      },
       wordColor : function(a,b) {
         if(b){
           if(a.match(b) !== null){
@@ -357,11 +384,7 @@ export default {
         var that = this;
         that.isSearchPicker = false;
       },
-      showSearchPicker : function(){
-        var that = this;
-        that.isSearchPicker = true;
-        that.searchData = [ that.group[that.list1[that.swiperIndex]]];
-      },
+    
       showPopupPicker : function(index,value){
         var that = this;
         
@@ -425,6 +448,7 @@ export default {
         that.currentList.list = Object.assign([],that.currentListClone.list);
         that.swiperIndex = index;
         console.log(that.swiperIndex)
+        that.searchData = that.group[that.list1[that.swiperIndex]];
         that.currentList = that.list2[that.list1[index]];
         that.currentListClone = Object.assign({},that.currentList);
         console.log(that.currentList)
@@ -445,20 +469,7 @@ export default {
       },
       showPopup : function(){
       },
-      changeSearchPopup : function(){
-        var that = this;
-        console.log("that.searchValue",that.searchValue)
-        that.searchInputValue = that.searchValue[0]
-
-        /*that.currentList.list = that.currentListClone.list;
-        var list = [];
-        for(var i=0,len=that.currentList.list.length;i<len;i++){
-          if(that.currentList.list[i].word_name.match(that.searchValue[0]) !== null){
-            list.push(that.currentList.list[i]);
-          }
-        }
-        that.currentList.list = list;*/
-      },
+      
       changeWordPopup : function(){
         var that = this;
         if(that.type === 1){
@@ -551,48 +562,17 @@ export default {
   .search-word-color{
     color:blue;
   }
+  html body .weui-icon-clear{
+    display:block!important;
+  }
 </style>
 <style lang="less" scoped>
 @import '~vux/src/styles/1px.less';
 @import '~vux/src/styles/center.less';
 @import '../css/common.css';
 
-#search-wrapper{
-  position:fixed;
-  right:0;
-  bottom:0;
-  width:100%;
-  
-  padding:8px 0;
-  font-size:14px;
-}
-.search-wrapper{
-  background-color:#fff;
-}
-#search-wrapper .search{
-  width:100%;
-}
-#search-wrapper .search .search-left{
-  width:80%;
-  margin-right:10px;
-}
-#search-wrapper .input-wrapper{
-  width:70%;
-  height:30px;
-  position:relative;
-  margin-right:10px;
-  margin-left:10px;
-}
-#search-wrapper input{
-  background: none;
-  border: none;
-  padding-left: 6px;
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  z-index: 10;
-  font-size:16px;
-}
+
+
 .num{
   width:25px;
   font-size:13px;
@@ -744,5 +724,50 @@ export default {
     border-radius:20px;
     text-align:center;
     margin-left:4px;
+  }
+  #right{
+    /*width:40%;*/
+    height:100%;
+    position:fixed;
+    right:0;
+    top:0;
+    z-index:100;
+    
+  }
+  .inner-right{
+    /*width:100%;*/
+    height:100%;
+  }
+  #right .right-content{
+    background-color:#fff;
+    width:150px;
+  }
+  #right .right-bd{
+    width:0;
+  }
+  #right .keybord{
+    overflow:hidden;
+    padding-left:5px;
+  }
+  #right .keybord p{
+    font-size:20px;
+    width:20px;
+    text-align:center;
+    float:left;
+    margin-right:8px;
+  }
+  #right .recommend-wrapper .title{
+    padding:10px;
+    font-size:18px;
+    color:#000;
+    font-weight:600;
+  }
+  #right .recommend{
+    overflow:hidden;
+  }
+  #right .recommend p{
+    float:left;
+    margin-left:10px;
+    font-size:18px;
   }
 </style>

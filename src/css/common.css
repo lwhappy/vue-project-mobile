@@ -733,15 +733,19 @@ a:focus {
 }
 input::-webkit-input-placeholder{
     color:#d9ddde;
+    font-size:12px;
 }
 input::-moz-placeholder{   /* Mozilla Firefox 19+ */
     color:#d9ddde;
+    font-size:12px;
 }
 input:-moz-placeholder{    /* Mozilla Firefox 4 to 18 */
      color:#d9ddde;
+     font-size:12px;
 }
 input:-ms-input-placeholder{  /* Internet Explorer 10-11 */ 
     color:#d9ddde;
+    font-size:12px;
 }
 
 textarea::-webkit-input-placeholder{
