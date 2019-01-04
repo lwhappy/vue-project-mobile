@@ -103,7 +103,7 @@
     </popup-picker>
     <div v-show="type === 0" id="search-wrapper" :class="isSearch?'search-wrapper vux-1px-t' : ''">
       <div class="box-end search">
-        <div class="box-end rest" v-show="isSearch">
+        <div class="box-justify  search-left" v-show="isSearch">
           <p @click="searchAll">全部</p>
           <p class="input-wrapper vux-1px">
             <input v-model="searchInputValue" type="text" />
@@ -316,7 +316,7 @@ export default {
   methods: {
       wordColor : function(a,b) {
         if(b){
-          if(a.match("b") !== null){
+          if(a.match(b) !== null){
             var index = a.indexOf(b);
             var str1 = a.substring(0,index );
             if(str1){
@@ -331,6 +331,9 @@ export default {
             console.log(word)
             return word;
           }
+          else{
+            return a;
+          }
         }
         else {
           return a;
@@ -338,6 +341,7 @@ export default {
       },
       searchAll : function(){
         var that = this;
+        that.searchInputValue = "";
         that.currentList.list = that.currentListClone.list;
       },
       showSearch : function(){
@@ -538,7 +542,7 @@ export default {
   html body .vux-popover .popover-content{
     padding:3px 6px;
   }
-  .weui-icon-search{
+  html body .weui-icon-search{
     font-size:24px;
   }
   .vux-swiper-item .tab-swiper:last-of-type{
@@ -559,7 +563,8 @@ export default {
   bottom:0;
   width:100%;
   
-  padding:10px 0;
+  padding:8px 0;
+  font-size:14px;
 }
 .search-wrapper{
   background-color:#fff;
@@ -567,8 +572,12 @@ export default {
 #search-wrapper .search{
   width:100%;
 }
+#search-wrapper .search .search-left{
+  width:80%;
+  margin-right:10px;
+}
 #search-wrapper .input-wrapper{
-  width:60%;
+  width:70%;
   height:30px;
   position:relative;
   margin-right:10px;
@@ -582,6 +591,7 @@ export default {
   height: 100%;
   position: absolute;
   z-index: 10;
+  font-size:16px;
 }
 .num{
   width:25px;
