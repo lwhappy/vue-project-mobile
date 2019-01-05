@@ -13,7 +13,14 @@ var obj = {
 		},
 		b : {
 			tab : ['ba','be', 'bi','bo','br','bu',],
-      		
+      		group : {
+      			ba : ["bab","back","bac","bad","bag","bak","bal","ban","bar","bas","bat","bath","batt","bay"],
+      			be : ["bea","bec","bee","beg","beha","bel","ben","ber","bes","bet","bey"],
+      			bi : ["bib","bic","big","bik","bil","bio","bir","bis","bit"],
+      			bo : ["boa","boi","bol","bom","bon","boo","bor","bos","bot","both","bott","bou","bow"],
+      			br : ["bra","bran","brea","bree","bri","bro","broo","brow","bru"],
+      			bu : ["bub","buc","bud","bui","bul","bull","bun","bur","bus","but","butt"]
+      		}
 		},
 		c:{
 			tab:['ca','ce','ch','ci','cl','co','cr','cu','cy']
