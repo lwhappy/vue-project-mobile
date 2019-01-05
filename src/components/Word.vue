@@ -26,12 +26,13 @@
                         <p class="num color3 box-end">{{index + 1}}.</p>
                         <p class="color1 en-size1" v-html="wordColor(item.word_name,searchInputValue)"></p>
                        
-                        <p class="color2 size3 ellipsis rest">&nbsp;&nbsp;英&nbsp;[{{item.ph_en}}] </p>
+                        
                     </div>
                   </div>
                   <div class="item-row item-row2 ">
                     
                     <div class="item-left">
+                      <p class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
                       <p class="ellipsis color2 size2 ">{{item.means}}</p>
                       <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
                       <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
@@ -44,7 +45,7 @@
                  <div class="type1" v-if="type === 1" >
                    <div class="item-row item-row1 box-start">
                     <p class="num color3 ">{{index + 1}}.</p>
-                    <p class="ellipsis color1 size1 rest">{{item.means}}</p>
+                    <p class="ellipsis color1 size2 rest">{{item.means}}</p>
                    </div>
                    <div  class="box-justify item-row" >
                        
@@ -52,7 +53,7 @@
                           <p class="input-wrapper vux-1px">
                              <input class=" input box-center size1" :readonly="(value.wordModelList[index][0] && value.wordModelList[index][0] === item.word_name) ? true : false" type="text" v-model="list2[key].wordModelList[index][0]">
                           </p>
-                          <p @click="showPopupPicker(index,item.word_name)" class="size2" v-show="!value.wordModelList[index][0] || (value.wordModelList[index][0] && value.wordModelList[index][0] !== item.word_name)" >点击选择</p>
+                          <p @click="showPopupPicker(index,item.word_name)" class="size3 color3" v-show="!value.wordModelList[index][0] || (value.wordModelList[index][0] && value.wordModelList[index][0] !== item.word_name)" >点击选择</p>
                           <!--<p class="size1">{{value.wordModelList[index][0]}}</p>-->
                        </div>
                        <!--<p style="display:none">{{wordModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
@@ -70,7 +71,7 @@
                    </div>
                    <div  class="box-justify item-row item-row2" >
                        <div class="color2 size2 box-justify item-left" >
-                          <p v-show="!value.meanModelList[index][0]" >点击选择</p>
+                          <p class="color3 size3" v-show="!value.meanModelList[index][0]" >点击选择</p>
                           <p>{{value.meanModelList[index][0]}}</p>
                        </div>
                        <!--<p style="display:none">{{meanModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
@@ -102,27 +103,33 @@
       
     </popup-picker>
    
-    <div id="right" class="" v-show="type === 0">
+    <div id="right" :class="isShowRight?'show-right':'hide-right'" v-show="type === 0">
       <div class="inner-right box-start align-stretch">
         <div class="box-center">
-          <x-icon v-show="!isShowRight" @click="isShowRight = true" style="margin-right:-9px" type="ios-arrow-left" size="30"></x-icon>
-          <x-icon v-show="isShowRight" @click="isShowRight = false" style="margin-right:-9px" type="ios-arrow-right" size="30"></x-icon>
+          <div class="box-end" v-show="!isShowRight" @click="isShowRight = true" style="margin-right:-12px;">
+            <x-icon   style="fill:#565454;margin-right:-25px" type="ios-arrow-left" size="40"></x-icon>
+            <x-icon   style="fill:#565454" type="ios-arrow-left" size="40"></x-icon>
+          </div>
+          <x-icon v-show="isShowRight" @click="isShowRight = false" style="margin-right:-12px;fill:#565454" type="ios-arrow-right" size="40"></x-icon>
         </div>
         <div v-show="isShowRight" class="vux-1px-l right-bd"></div>
         <div v-show="isShowRight" class="rest  right-content">
           <div>
-            <group>
-              <x-input readonly="readonly" style="font-size:18px;padding-left:10px" text-align="left" v-model="searchInputValue" placeholder="字母组合"></x-input>
-            </group>
+              <div class="box-justify vux-1px-b">
+                <input class="right-input color1" type="text" readonly="readonly"   v-model="searchInputValue" placeholder="字母组合"></input>
+                <x-icon v-show="searchInputValue" @click="backspace" style="fill:rgb(179, 176, 176)" type="ios-close" size="20"></x-icon>
+              </div>
+
             <div class="keybord">
-              <p @click="getKey(item)"  v-for="(item, index) in keybord" :key="index">{{item.toLowerCase()}}</p>
+              <p class="color1 size1" @click="getKey(item)"  v-for="(item, index) in keybord" :key="index">{{item.toLowerCase()}}</p>
             </div>
           </div>
-          <div class="recommend-wrapper">
-            <p class="title">推荐：</p>
+          <div class="recommend-wrapper ">
+            <p class="title color3 size2 vux-1px-t vux-1px-b">前三字母：</p>
             <div class="recommend">
-              <p @click="searchAll">全部</p>
-              <p @click="wordFilter(item)"  v-for="(item, index) in searchData" :key="index">{{item}}</p>
+              
+              <p class="color1 size2" @click="wordFilter(item)" :class="searchInputValue === item ? 'search-word-color':''" v-for="(item, index) in searchData" :key="index">{{item}}</p>
+              <p class="color1 size3" @click="searchAll">全部</p>
             </div>
           </div>
         </div>
@@ -227,10 +234,7 @@ export default {
     var name = that.$router.history.current.params.name;
     const api = 'static/cet4/cet4-'+name+'.js';
     that.list1 = config.all.words[name].tab;
-    if(config.all.words[name].group){
-      that.group = config.all.words[name].group;
-      that.searchData = that.group[that.list1[that.swiperIndex]];
-    }
+  
     
     
     console.log("that.searchData",that.searchData)
@@ -270,8 +274,9 @@ export default {
         var words = response.data;
         for(var o in words){
           for(var i=0,len=that.list1.length;i<len;i++){
-            var strLen = that.list1[i].length;
-            if(o.substr(0,strLen) === that.list1[i]){
+            var tabItem = that.list1[i];
+            var strLen = tabItem.length;
+            if(o.substr(0,strLen) === tabItem){
               try{
                 var wordObj = JSON.parse(words[o])
               
@@ -286,15 +291,15 @@ export default {
               wordObj.means = wordObj.symbols[0]["parts"][0].part + wordObj.symbols[0]["parts"][0].means.join(";")
               wordObj.ph_am = wordObj.symbols[0].ph_am
               wordObj.ph_en = wordObj.symbols[0].ph_en
-              that.list2[that.list1[i]].list.push(wordObj)
-              that.list2[that.list1[i]].wordList[0].push(wordObj.word_name)
-              that.list2[that.list1[i]].meanList[0].push(wordObj.means)
-              var l = that.list2[that.list1[i]].meanList[0].length;
+              that.list2[tabItem].list.push(wordObj)
+              that.list2[tabItem].wordList[0].push(wordObj.word_name)
+              that.list2[tabItem].meanList[0].push(wordObj.means)
+              var l = that.list2[tabItem].meanList[0].length;
               //that.list2[that.list1[i]].wordModelList[l-1]=['']
               //that.list2[that.list1[i]].meanModelList[l-1]=['']
 
-              Vue.set(that.list2[that.list1[i]].wordModelList, l-1, [''])
-              Vue.set(that.list2[that.list1[i]].meanModelList, l-1, [''])
+              Vue.set(that.list2[tabItem].wordModelList, l-1, [''])
+              Vue.set(that.list2[tabItem].meanModelList, l-1, [''])
             }
           }
         }
@@ -305,7 +310,22 @@ export default {
           that.list2[o].meanList[0].sort(function(){
             return .5 -Math.random()
           })
+          var list = that.list2[o].list;
+          that.group[o] = [];
+          if(list.length){
+            var findStr = list[0].word_name.substr(0,3);
+            that.group[o].push(findStr);
+            for(var i=1,len=list.length;i<len;i++ ){
+              var str = list[i].word_name.substr(0,3);
+              if(str !== findStr){
+                that.group[o].push(str);
+                findStr = str;
+              }
+            }
+          }
+          
         }
+        that.searchData = that.group[that.list1[that.swiperIndex]];
         console.log("that.list2",that.list2)
         that.list2Clone = Object.assign({},that.list2)
         console.log("that.list2Clone",that.list2Clone)
@@ -336,6 +356,14 @@ export default {
     
   },
   methods: {
+      backspace : function(){
+        var that = this;
+
+        console.log(that.searchInputValue)
+        if(that.searchInputValue){
+          that.searchInputValue = that.searchInputValue.substr(0,that.searchInputValue.length-1);
+        }
+      },
       getKey:function(key){
         var that = this;
         key = key.toLowerCase();
@@ -527,7 +555,7 @@ export default {
   }
 
   html body .tab-swiper{
-    padding:10px 0;
+    padding:10px 0 15px 0;
   }
   html body .vux-no-group-title{
     margin-top:0;
@@ -566,9 +594,7 @@ export default {
   .vux-swiper-item .tab-swiper:last-of-type{
     margin-bottom:50px;
   }
-  .search-word-color{
-    color:blue;
-  }
+  
   html body .weui-icon-clear{
     display:block!important;
   }
@@ -608,6 +634,9 @@ export default {
   }
   .color3{
     color:#908e8e;
+  }
+  html body .search-word-color{
+    color:#4040d4;
   }
   h1{
     height:30px;
@@ -695,13 +724,19 @@ export default {
     padding-left:30px;
     width:auto;
   }
+  .type0 .item-row .item-left p:first-of-type{
+    margin-bottom:7px;
+  }
   .type0 .item-row .item-left .sentence{
     line-height:20px;
   }
   .type0 .item-row .item-left .sentence1{
-      padding:5px 0;
+      padding:7px 0 2px 0;
       
   }
+  .type1 .item-row1{
+    margin-bottom:5px;
+  } 
   .type1 .item-row .item-left,.type2 .item-row .item-left{
     width: 80%;
     padding-left: 30px;
@@ -741,23 +776,28 @@ export default {
     z-index:100;
     
   }
+  .show-right{
+    width:50%;
+  }
+  .hide-right{
+    width:auto;
+  }
   .inner-right{
-    /*width:100%;*/
+    width:100%;
     height:100%;
   }
   #right .right-content{
     background-color:#fff;
-    width:150px;
+
   }
   #right .right-bd{
     width:0;
   }
   #right .keybord{
     overflow:hidden;
-    padding-left:5px;
+    padding:5px 0 5px 10px;
   }
   #right .keybord p{
-    font-size:20px;
     width:20px;
     text-align:center;
     float:left;
@@ -765,16 +805,26 @@ export default {
   }
   #right .recommend-wrapper .title{
     padding:10px;
-    font-size:18px;
-    color:#000;
     font-weight:600;
   }
   #right .recommend{
     overflow:hidden;
+    padding-top:7px;
   }
   #right .recommend p{
     float:left;
     margin-left:10px;
+    margin-bottom:5px;
+    margin-right:5px;
+  }
+  #right .right-input{
     font-size:18px;
+    padding-left:10px;
+    display:block;
+    width:80%;
+    border:none;
+    background:none;
+    height:30px;
+    line-heigh:normal;
   }
 </style>
