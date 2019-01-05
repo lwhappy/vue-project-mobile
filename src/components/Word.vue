@@ -227,8 +227,12 @@ export default {
     var name = that.$router.history.current.params.name;
     const api = 'static/cet4/cet4-'+name+'.js';
     that.list1 = config.all.words[name].tab;
-    that.group = config.all.words[name].group;
-    that.searchData = that.group[that.list1[that.swiperIndex]];
+    if(config.all.words[name].group){
+      that.group = config.all.words[name].group;
+      that.searchData = that.group[that.list1[that.swiperIndex]];
+    }
+    
+    
     console.log("that.searchData",that.searchData)
     //that.firstKey = that.list1[0];
     //console.log(that.$router.history.current.params.name)
@@ -448,7 +452,10 @@ export default {
         that.currentList.list = Object.assign([],that.currentListClone.list);
         that.swiperIndex = index;
         console.log(that.swiperIndex)
-        that.searchData = that.group[that.list1[that.swiperIndex]];
+        if(that.group){
+          that.searchData = that.group[that.list1[that.swiperIndex]];
+        }
+        
         that.currentList = that.list2[that.list1[index]];
         that.currentListClone = Object.assign({},that.currentList);
         console.log(that.currentList)
