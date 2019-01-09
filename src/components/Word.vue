@@ -67,12 +67,14 @@
                    <div  class="item-row item-row1 box-start">
                      <p class="num color3 ">{{item.num}}.</p>
                      <p class="color1 en-size1">{{item.word_name}}</p>
-                     <p class="color2 size2 rest ellipsis">&nbsp;&nbsp;美&nbsp;[{{item.ph_am}}]</p>
                    </div>
                    <div  class="box-start item-row item-row2" >
-                       <div class="color2 size2 box-justify item-left" >
-                          <p class="color3 size3" v-show="!value.meanModelList[index][0]" >点击选择</p>
-                          <p class="color2 size3">{{value.meanModelList[index][0]}}</p>
+                       <div class="color2 size2 item-left" >
+                          <p class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
+                          <div class="box-justify">
+                            <p class="color3 size3" v-show="!value.meanModelList[index][0]" >点击选择</p>
+                            <p class="color2 size3">{{value.meanModelList[index][0]}}</p>
+                          </div>
                        </div>
                        <!--<p style="display:none">{{meanModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
                        
