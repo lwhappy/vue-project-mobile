@@ -53,6 +53,7 @@
                           <p class="input-wrapper vux-1px">
                              <input class=" input box-center size1" :readonly="(value.wordModelList[index][0] && value.wordModelList[index][0] === item.word_name) ? true : false" type="text" v-model="list2[key].wordModelList[index][0]">
                           </p>
+                          
                           <p @click="showPopupPicker(index,item.word_name)" class="size3 color3" v-show="!value.wordModelList[index][0] || (value.wordModelList[index][0] && value.wordModelList[index][0] !== item.word_name)" >点击选择</p>
                           <!--<p class="size1">{{value.wordModelList[index][0]}}</p>-->
                        </div>
@@ -60,6 +61,13 @@
                        
                      <p class="item-right" v-show="value.wordModelList[index][0] && value.wordModelList[index][0] === item.word_name"><icon  type="success"></icon></p>
                      <p class="item-right" v-show="value.wordModelList[index][0] && value.wordModelList[index][0] !== item.word_name"><icon  type="warn"></icon></p>
+                   </div>
+                   <div class="item-row" v-show="value.wordModelList[index][0] && value.wordModelList[index][0] === item.word_name">
+                      <div class="item-left">
+                        <p  class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
+                        <p  class="sentence sentence1 color3 size3">{{item.sentence.Network_en}}</p>
+                        <p  class="sentence sentence2 color3 size3">{{item.sentence.Network_cn}}</p>
+                    </div>
                    </div>
                    
                  </div>
@@ -80,6 +88,12 @@
                        
                      <p class="item-right" v-show="value.meanModelList[index][0] && value.meanModelList[index][0] === item.means"><icon  type="success"></icon></p>
                      <p class="item-right" v-show="value.meanModelList[index][0] && value.meanModelList[index][0] !== item.means"><icon  type="warn"></icon></p>
+                   </div>
+                   <div class="item-row" v-show="value.meanModelList[index][0] && value.meanModelList[index][0] === item.means">
+                     <div class="item-left">
+                      <p  class="sentence sentence1 color3 size3">{{item.sentence.Network_en}}</p>
+                      <p  class="sentence sentence2 color3 size3">{{item.sentence.Network_cn}}</p>
+                     </div>
                    </div>
                  </div>
                
@@ -492,6 +506,12 @@ export default {
         that.searchInputValue = "";
         console.log("that.list2Clone",that.list2Clone)
         that.currentList.list = Object.assign([],that.currentListClone.list);
+        //searchInputValue新旧值相同时不会触发watch
+        for(var i=0,len=that.currentList.list.length;i<len;i++){
+          that.currentList.list[i].isShow = true;
+          that.currentList.list[i].num = i+1;
+         
+        }
         that.swiperIndex = index;
         console.log(that.swiperIndex)
         if(that.group){
@@ -716,7 +736,8 @@ export default {
   }
   .item-row .input-wrapper{
     height:30px;
-    width:65%;
+    width:45%;
+    margin-right:5px;
     display:block;
   }
   .item-row .input-wrapper .input{
@@ -753,6 +774,9 @@ export default {
   .type1 .item-row .item-left,.type2 .item-row .item-left{
     width: 65%;
     padding-left: 25px;
+  }
+  .type1 .item-row .item-left{
+    width:70%;
   }
   .notice{
     height:50px;
