@@ -64,7 +64,7 @@
                    </div>
                    <div class="item-row" v-show="value.wordModelList[index][0] && value.wordModelList[index][0] === item.word_name">
                       <div class="item-left">
-                        <p  class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
+                        <p style="margin:5px 0" class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
                         <p  class="sentence sentence1 color3 size3">{{item.sentence.Network_en}}</p>
                         <p  class="sentence sentence2 color3 size3">{{item.sentence.Network_cn}}</p>
                     </div>
@@ -90,7 +90,7 @@
                      <p class="item-right" v-show="value.meanModelList[index][0] && value.meanModelList[index][0] !== item.means"><icon  type="warn"></icon></p>
                    </div>
                    <div class="item-row" v-show="value.meanModelList[index][0] && value.meanModelList[index][0] === item.means">
-                     <div class="item-left">
+                     <div class="item-left" style="margin-top:5px">
                       <p  class="sentence sentence1 color3 size3">{{item.sentence.Network_en}}</p>
                       <p  class="sentence sentence2 color3 size3">{{item.sentence.Network_cn}}</p>
                      </div>
@@ -736,7 +736,7 @@ export default {
   }
   .item-row .input-wrapper{
     height:30px;
-    width:45%;
+    width:65%;
     margin-right:5px;
     display:block;
   }
