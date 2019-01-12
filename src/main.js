@@ -9,6 +9,7 @@ import App from './App'
 //import AlertDemo from './components/HelloFromVux'
 import Word from './components/Word'
 import WordIndex from './components/WordIndex'
+import MyWord from './components/MyWord'
 
 Vue.use(VueRouter)
 
@@ -30,7 +31,11 @@ const routes = [
       component: Word,
       name :"word"
   },
-  
+  {
+      path: '/my-word',
+      component: MyWord,
+      name :"myWord"
+  },
   /*{
       path: '/w',
       component: WordIndex

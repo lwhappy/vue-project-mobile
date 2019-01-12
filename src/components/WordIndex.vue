@@ -13,10 +13,13 @@
     <div class="index-main">
       <swiper v-model="tabIndex" height="100%" :show-dots="false" @on-index-change="changeSwiper">
         <swiper-item v-for="(swiperItem,swiperIndex) in tabList" class="box-justify item"  :key="swiperIndex" :selected="swiperIndex===tabIndex"> 
-          <div class="item-wrapper">
+          <div class="item-wrapper" v-if="swiperIndex < 3">
             <div v-for="(item,index) in list" class="box-justify item"> 
               <a v-for="(innerItem,innerIndex) in item" class="box-center" @click="go(innerItem)">{{innerItem}}</a>
             </div>
+          </div>
+          <div v-if="swiperIndex === 3">
+            <x-button type="primary" action-type="button" @click.native="myCatgory">我的分类</x-button>
           </div>
         </swiper-item>
       </swiper>
@@ -30,7 +33,7 @@
 <script>
 import Vue from 'vue'
 
-import { Tab, TabItem,Swiper, SwiperItem,Loading} from 'vux'  
+import { Tab, TabItem,Swiper, SwiperItem,Loading,XButton } from 'vux'  
 
 export default {
   components: {
@@ -38,14 +41,15 @@ export default {
     TabItem,
     Swiper, 
     SwiperItem,
-    Loading
+    Loading,
+    XButton
     
   },
   data () {
     return {
         type : 0,
         tabIndex : 0,
-        tabList : ["学习模式","中英练习","英中练习"],
+        tabList : ["学习模式","中英练习","英中练习","自定义"],
         list :[
                 ["A","B","C","D","E"],
                 ["F","G","H","I","J"],
@@ -64,6 +68,10 @@ export default {
     that.$vux.loading.hide();
   },
   methods: {
+    myCatgory: function(){
+      var that = this;
+      that.$router.push({ name: 'myWord'})
+    },
     go : function(value){
       var that = this;
       value = value.toLowerCase();
@@ -90,6 +98,11 @@ export default {
   }
   body .vux-slider{
     height:100%;
+  }
+  html body .weui-btn_primary {
+      background-color: #1AAD19;
+      color:#fff;
+      padding:5px 20px;
   }
 </style>
 <style lang="less" scoped>

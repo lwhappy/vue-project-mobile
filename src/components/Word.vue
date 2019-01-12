@@ -25,7 +25,7 @@
                     <div class="size1 box-start">
                         <p class="num color3 box-end">{{item.num}}.</p>
                         <p class="color1 en-size1" v-html="wordColor(item.word_name,searchInputValue)"></p>
-                       
+                        <p @click="addToCategory(item)" style="margin-left:20px;font-size:20px">+</p>
                         
                     </div>
                   </div>
@@ -115,9 +115,26 @@
     <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup()" @on-show="showPopup()" @on-change="changeWordPopup()" v-model="popupValue" :popup-title="popupTitle">
       
     </popup-picker><!--只初始化一个-->
-   
+    <div v-transfer-dom>
+      <confirm v-model="isShowConfirm"
+      ref="confirm1"
+      :title="confirmTitle"
+      @on-cancel="onCancel"
+      @on-confirm="onConfirm"
+      @on-show="onShow"
+      @on-hide="onHide">
+        <div stle="max-height:300px;overflow:auto">
+          <div style="height:24px" v-for="(categoryItem,categoryIndex) in myCategory" :key="categoryItem.createTime" class="box-justify" @click="selectCategory(categoryItem)">
+            <p>{{categoryItem.name}}</p>
+            <x-icon v-show="categoryItem === activeCategory" style="fill:#F70968;"   type="ios-checkmark-empty" size="28" ></x-icon>
+          </div>
+          <div class="box-start">
+            <group><x-input v-model="newCategory"></x-input></group><p style="width:50px" @click="addNewCategory">添加</p>
+          </div>
+        </div>
+      </confirm>
+    </div>
       
-    </popup-picker>
    
     <div id="right" >
       <div class="inner-right-wrapper box-v-justify">
@@ -152,10 +169,13 @@ import axios from 'axios';
 //import config from '../js/cet4/config.js';
 //console.log("config",config)
 
-import { Tab, TabItem, Sticky, Divider, XButton, Swiper, SwiperItem, Datetime, Selector, Marquee, MarqueeItem, Toast , PopupPicker , ButtonTab, ButtonTabItem,Icon ,Loading,Popover,XInput } from 'vux'
-
+import { Tab, TabItem, Sticky, Divider, XButton, Swiper, SwiperItem, Datetime, Selector, Marquee, MarqueeItem, Toast , PopupPicker , ButtonTab, ButtonTabItem,Icon ,Loading,Popover,XInput,Confirm,TransferDomDirective as TransferDom, ConfirmPlugin } from 'vux'
+Vue.use(ConfirmPlugin)
 
 export default {
+  directives: {
+    TransferDom
+  },
   components: {
     Tab,
     TabItem,
@@ -175,10 +195,17 @@ export default {
     Icon ,
     Loading,
     Popover,
-    XInput 
+    XInput,
+    Confirm 
   },
   data () {
     return {
+      newCategory: '',
+      activeWord: null,
+      activeCategory: '',
+      myCategory: [],
+      confirmTitle: '添加到我的分类',
+      isShowConfirm: false,
       type : Number(this.$route.params.type) || 0,
       index01: 0,
       list1: [],
@@ -250,7 +277,15 @@ export default {
     var name = that.$router.history.current.params.name;
     const api = 'static/cet4/cet4-'+name+'.js';
   
-    
+    var myCategory = localStorage.getItem('myCategory')
+    try {
+      myCategory = JSON.parse(myCategory)
+    } catch(e){
+      console.log(e)
+    }
+    if(myCategory instanceof Array){
+      that.myCategory = myCategory
+    }
     
     console.log("that.searchData",that.searchData)
     //that.firstKey = that.list1[0];
@@ -382,6 +417,62 @@ export default {
     
   },
   methods: {
+      addNewCategory: function(){
+        var that = this
+
+        if(that.newCategory){
+          for(var i=0,len=that.myCategory.length;i<len;i++){
+            if(that.myCategory[i].name === that.newCategory){
+              that.$vux.toast.text('有重名')
+              return
+            }
+          }
+          var obj = {
+            createTime: new Date().getTime().toString(),
+            name: that.newCategory,
+            word: []
+          }
+          that.myCategory.push(obj)
+          var myCategory = JSON.stringify(that.myCategory)
+          localStorage.setItem('myCategory',myCategory)
+          that.newCategory = ''
+        }
+      },
+      selectCategory: function(item) {
+        var that = this
+        that.activeCategory = item
+      },
+      onCancel: function(){
+        var that = this
+        that.activeCategory = ''
+      },
+      onConfirm: function(name){
+         var that = this
+         try{
+            //that.activeCategory.word = JSON.parse(that.activeCategory.word)
+            var activeWord = Object.assign({},that.activeWord)
+            delete activeWord.isShow
+            delete activeWord.num
+            that.activeCategory.word.push(activeWord)
+            console.log(that.myCategory)
+            var myCategory = JSON.stringify(that.myCategory)
+            localStorage.setItem('myCategory',myCategory)
+         } catch(e){
+            console.log(e)
+         }
+         
+      },
+      onHide: function(){
+
+      },
+      onShow: function(){
+         
+      }, 
+      addToCategory: function(item) {
+        var that = this
+        that.isShowConfirm = true
+        that.activeWord = item
+      },
       backspace : function(){
         var that = this;
 
