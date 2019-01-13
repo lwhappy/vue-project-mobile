@@ -123,7 +123,7 @@
       @on-confirm="onConfirm"
       @on-show="onShow"
       @on-hide="onHide">
-        <div stle="max-height:300px;overflow:auto">
+        <div style="max-height:300px;overflow:auto">
           <div style="height:24px" v-for="(categoryItem,categoryIndex) in myCategory" :key="categoryItem.createTime" class="box-justify" @click="selectCategory(categoryItem)">
             <p>{{categoryItem.name}}</p>
             <x-icon v-show="categoryItem === activeCategory" style="fill:#F70968;"   type="ios-checkmark-empty" size="28" ></x-icon>
@@ -433,6 +433,8 @@ export default {
             word: []
           }
           that.myCategory.push(obj)
+          that.activeCategory = obj
+          console.log(that.activeCategory,that.myCategory)
           var myCategory = JSON.stringify(that.myCategory)
           localStorage.setItem('myCategory',myCategory)
           that.newCategory = ''

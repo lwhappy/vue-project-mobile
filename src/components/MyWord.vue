@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="padding-bottom:44px">
     <div>
       <div style="padding:5px 10px" v-for="(item , index) in myCategory" :key="item.createTime" class="vux-1px-b">
         <div class="box-justify" >
