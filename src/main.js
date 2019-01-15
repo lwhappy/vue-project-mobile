@@ -10,6 +10,7 @@ import App from './App'
 import Word from './components/Word'
 import WordIndex from './components/WordIndex'
 import MyWord from './components/MyWord'
+import Sentence from './components/Sentence'
 
 Vue.use(VueRouter)
 
@@ -36,6 +37,11 @@ const routes = [
       component: MyWord,
       name :"myWord"
   },
+  {
+      path: '/sentence/:name',
+      component: Sentence,
+      name :"sentence"
+  }
   /*{
       path: '/w',
       component: WordIndex
