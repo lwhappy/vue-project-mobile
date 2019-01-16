@@ -19,28 +19,34 @@
           <swiper-item v-for="(value,key,outerIndex) in list2" :key="outerIndex" :selected="outerIndex===swiperIndex">
             <!--<div v-show="outerIndex !== swiperIndex" style="height:100%"><loading :show="showLoading" text="Loading"></loading></div>-->
             <div> 
-              <div v-for="(item, index) in value.sentences" :key="index" class="tab-swiper  vux-1px-b" >
-                <div  class="type0" >
-                  <div  class="item-row item-row1">
-                    <div class="size1 box-start">
-                        <p class="num color3 box-end">{{item.num}}.</p>
-                        <p class="color1 en-size1" >{{item.Network_en}}</p>
-                        
+              <div style="width:99%" v-for="(item, index) in value.sentences" :key="index" class="tab-swiper " :class="item.isActive?'vux-1px sentence-active':'vux-1px-b'" @click="setActive(key,index)">
+                <div  class="type0 box-start" >
+                  <div>
+                    <div  class="item-row item-row1">
+                      <div class="size1 box-start">
+                          <p class="num color3 box-end">{{item.num}}.</p>
+                          <p v-show="!isShowKeybord" class="color1 en-size1" v-html="wordColor(item.Network_en,value.list[index])"></p>
+                          <p v-show="isShowKeybord" class="color1 en-size1">{{wordLeft(item.Network_en,value.list[index])}} <span class="sentence-word">({{value.list[index].model}})</span> {{wordRight(item.Network_en,value.list[index])}}</p>
+                          
+                      </div>
+                    </div>
+                    <div  class="item-row item-row2 ">
+                      
+                      <div class="item-left">
+                        <p class="color2 size1" >{{item.Network_cn}}</p>
+                        <p v-show="isTip" class="color2 size2 ellipsis rest">英&nbsp;[{{value.list[index].ph_en}}] &nbsp;美&nbsp;[{{value.list[index].ph_am}}]</p>
+                        <p v-show="isTip" class=" color2 size2 ">{{value.list[index].means}}</p>
+
+                        <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
+                        <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
+                        <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_cn}}</p>-->
+
+                      </div>
                     </div>
                   </div>
-                  <div class="item-row item-row2 ">
-                    
-                    <div class="item-left">
-                      <p class="color1 en-size1" >{{item.Network_cn}}</p>
-                      <p class="color2 size3 ellipsis rest">英&nbsp;[{{value.list[index].ph_en}}] &nbsp;美&nbsp;[{{value.list[index].ph_am}}]</p>
-                      <p class=" color2 size3 ">{{value.list[index].means}}</p>
 
-                      <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
-                      <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
-                      <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_cn}}</p>-->
-
-                    </div>
-                  </div>
+                  <p class="item-right" v-show="value.list[index].model === value.list[index].word_name"><icon  type="success"></icon></p>
+                  <p class="item-right" v-show="value.list[index].model !=='?' && value.list[index].model !== value.list[index].word_name"><icon  type="warn"></icon></p>
                 </div>
                  
                
@@ -56,7 +62,58 @@
     <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup()" @on-show="showPopup()" @on-change="changeWordPopup()" v-model="popupValue" :popup-title="popupTitle">
       
     </popup-picker><!--只初始化一个-->
-   
+    <div class="bot">
+      <div class="bot-inner box-v-start">
+        <div v-show="!isShowKeybord" class="box-v-start algin-center" style="margin-bottom:-10px;" @click="isShowKeybord=true">
+          <x-icon style="margin-bottom:-20px;fill:red" type="ios-arrow-up" size="40"></x-icon>
+          <x-icon type="ios-arrow-up" style="fill:red" size="40"></x-icon>
+        </div>
+        <div v-show="isShowKeybord" class="keybord" >
+          <div class="box-center keybord-item">
+            <p @click="getKey('a')">a</p>
+            <p @click="getKey('b')">b</p>
+            <p @click="getKey('c')">c</p>
+            <p @click="getKey('d')">d</p>
+            <p @click="getKey('e')">e</p>
+          </div>
+          <div class="box-center keybord-item">
+            <p @click="getKey('f')">f</p>
+            <p @click="getKey('g')">g</p>
+            <p @click="getKey('h')">h</p>
+            <p @click="getKey('i')">i</p>
+            <p @click="getKey('j')">j</p>
+          </div>
+          <div class="box-center keybord-item">
+            <p @click="getKey('k')">k</p>
+            <p @click="getKey('l')">l</p>
+            <p @click="getKey('m')">m</p>
+            <p @click="getKey('n')">n</p>
+            <p @click="getKey('o')">o</p>
+          </div>
+          <div class="box-center keybord-item">
+            <p @click="getKey('p')">p</p>
+            <p @click="getKey('q')">q</p>
+            <p @click="getKey('r')">r</p>
+            <p @click="getKey('s')">s</p>
+            <p @click="getKey('t')">t</p>
+          </div>
+          <div class="box-center keybord-item">
+            <p @click="getKey('u')">u</p>
+            <p @click="getKey('v')">v</p>
+            <p @click="getKey('w')">w</p>
+            <p @click="getKey('x')">x</p>
+            <p @click="getKey('y')">y</p>
+          </div>
+          <div class="box-center keybord-item">
+            <p @click="getKey('z')">z</p>
+            <p class="chinese" @click="isTip = true">提示</p>
+            <p class="chinese" @click="getAnswer">答案</p>
+            <p><x-icon style="fill:red" type="ios-arrow-thin-left" size="30" @click="backspace"></x-icon></p>
+            <p><x-icon style="fill:red" type="ios-close-outline" size="30" @click="isShowKeybord=false"></x-icon></p>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -99,6 +156,10 @@ export default {
   },
   data () {
     return {
+      sentenceApi : 'http://localhost/word/php/get-sentence.php',
+      isTip: false,
+      currentListItem: null,
+      isShowKeybord:false,
       newCategory: '',
       activeWord: null,
       activeCategory: '',
@@ -151,7 +212,7 @@ export default {
     var that = this;
     var name = that.$router.history.current.params.name;
     const api = 'static/cet4/cet4-'+name+'.js';
-    const sentenceApi = 'http://localhost/word/php/get-sentence.php'
+    
     
     //that.firstKey = that.list1[0];
     //console.log(that.$router.history.current.params.name)
@@ -214,6 +275,7 @@ export default {
               wordObj.ph_am = wordObj.symbols[0].ph_am
               wordObj.ph_en = wordObj.symbols[0].ph_en
               wordObj.isShow = true;
+              wordObj.model = "?"
               wordObj.num = that.list2[tabItem].list.length + 1;
               that.list2[tabItem].list.push(wordObj)
 
@@ -234,7 +296,7 @@ export default {
         let param = new URLSearchParams()
         param.append('words', JSON.stringify(wordArr))
         axios({
-            url:sentenceApi,
+            url:that.sentenceApi,
             method: 'post',
             data: param,
             headers:{
@@ -261,8 +323,119 @@ export default {
     
   },
   methods: {
-      
-      
+      getAnswer: function(){
+        var that  = this
+        that.currentListItem.model = that.currentListItem.word_name
+      },
+      backspace:function(){
+        var that = this
+        if(that.currentListItem.model === "?"){
+          return
+        }
+        var len = that.currentListItem.model.length
+        if(len < 1){
+          return
+        }
+        that.currentListItem.model = that.currentListItem.model.substr(0,len-1)
+      },
+      getKey: function(key){
+        var that = this
+        if(that.currentListItem.model === "?"){
+          that.currentListItem.model = ''
+        }
+        that.currentListItem.model += key 
+      },
+      setActive: function(key,index){
+        
+        var that = this
+        var obj = that.list2[key]
+        var sentences = obj.sentences
+        that.currentListItem = obj.list[index]
+        for(var i=0,len=sentences.length;i<len;i++){
+          var obj2 = sentences[i]
+          obj2.isActive = false
+          if(i === index){
+            obj2.isActive = true
+            //Vue.set(list, 0, newData)
+          }
+          Vue.set(sentences, i, obj2)
+        }
+
+        Vue.set(that.list2, key, obj)
+      },
+      wordLeft : function(a,obj) {
+        var that = this
+        if(obj){
+          var b = obj.word_name
+        }
+        
+        if(b){
+          if(a && a.match(b) !== null){
+            var index = a.indexOf(b);
+            var str1 = a.substring(0,index );
+            
+            return str1;
+          }
+          else{
+            return a;
+          }
+        }
+        else {
+          return a;
+        }
+      },
+      wordRight : function(a,obj) {
+        var that = this
+        if(obj){
+          var b = obj.word_name
+        }
+        
+        if(b){
+          if(a && a.match(b) !== null){
+            var index = a.indexOf(b);
+            var str2 = a.substring(index+b.length);
+            return str2;
+          }
+          else{
+            return a;
+          }
+        }
+        else {
+          return a;
+        }
+      },
+      wordColor : function(a,obj) {
+        var that = this
+        if(obj){
+          var b = obj.word_name
+        }
+        
+        if(b){
+          if(a && a.match(b) !== null){
+            var index = a.indexOf(b);
+            var str1 = a.substring(0,index );
+            if(str1){
+              str1 = "<span>" + str1 + "</span>";
+            }
+            var str2 = a.substring(index+b.length);
+            if(str2){
+              str2 = "<span>" + str2 + "</span>"
+            }
+            
+              b = '<span class="sentence-word">' + b + '</span>';
+            
+            var word = str1 +b + str2;
+            console.log(word)
+            return word;
+          }
+          else{
+            return a;
+          }
+        }
+        else {
+          return a;
+        }
+      },
      
       hidePopup : function(){
         var that = this;
@@ -311,40 +484,39 @@ export default {
       
       changeSwiper : function(index){
         var that = this;
-        that.isSearch = false;
-        that.isSearchPicker = false;
-        that.searchInputValue = "";
-        console.log("that.list2Clone",that.list2Clone)
-        that.currentList.list = Object.assign([],that.currentListClone.list);
-        //searchInputValue新旧值相同时不会触发watch
-        for(var i=0,len=that.currentList.list.length;i<len;i++){
-          that.currentList.list[i].isShow = true;
-          that.currentList.list[i].num = i+1;
-         
-        }
         that.swiperIndex = index;
-        console.log(that.swiperIndex)
-        if(that.group){
-          that.searchData = that.group[that.list1[that.swiperIndex]];
+        var key = that.list1[index]
+        if(that.list2[key].sentences.length > 0){
+          return
         }
+        var list = that.list2[key].list
+        var wordArr = []
+        for(var i=0,len=list.length;i<len;i++){
+          wordArr.push(list[i].word_name)
+        }
+        console.log(wordArr)
         
-        that.currentList = that.list2[that.list1[index]];
-        that.currentListClone = Object.assign({},that.currentList);
-        console.log(that.currentList)
-        switch(that.type){
-          case 0:
+        //obj = JSON.stringify(obj)
+        //wordArr = JSON.stringify(wordArr)
+        let param = new URLSearchParams()
+        param.append('words', JSON.stringify(wordArr))
+        axios({
+            url:that.sentenceApi,
+            method: 'post',
+            data: param,
+            headers:{
+            }
             
-            break;
-          case 1:
-            
-            that.popupData = that.currentList.wordList;
-            break;
-           case 2:
-           
-            
-            that.popupData = that.currentList.meanList;
-            break;
-        }
+          })
+          .then(response=>{
+            console.log(response.data)
+            var obj = that.list2[key]
+            for(var i=0,len=response.data.length;i<len;i++){
+              Vue.set(obj.sentences,i,response.data[i])
+            }
+            Vue.set(that.list2,key,obj)
+          })
+        
       },
       
       
@@ -370,10 +542,7 @@ export default {
     border:none;
   }  
 
-  .bot{
-    background:#F6F6F6;
-    height:44px;
-  }
+
 
   html body .tab-swiper{
     padding:10px 0 15px 0;
@@ -418,6 +587,12 @@ export default {
   
   html body .weui-icon-clear{
     display:block!important;
+  }
+  .sentence-word{
+    color:blue;
+  }
+  .sentence-active:before,.sentence-active:after{
+    border-color:red!important;
   }
 </style>
 <style lang="less" scoped>
@@ -629,5 +804,24 @@ export default {
     color:#fff;
   }
   
-  
+  .bot{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+  }
+  .bot .keybord{
+    margin-top:30px;
+    background-color:#fff;
+    width:100%;
+  }
+  .bot .keybord .keybord-item p{
+    text-align:center;
+    font-size:24px;
+    padding:5px;
+  }
+  .bot .keybord .keybord-item p.chinese{
+    font-size:14px;
+  }
+
 </style>
