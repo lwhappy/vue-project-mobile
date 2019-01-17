@@ -676,10 +676,7 @@ export default {
     border:none;
   }  
 
-  .bot{
-    background:#F6F6F6;
-    height:44px;
-  }
+  
 
   html body .tab-swiper{
     padding:10px 0 15px 0;
@@ -690,19 +687,7 @@ export default {
   html body .weui-cell{
     padding:5px 0;
   }
-  .bot p{
-    color:#3A3A3A;
-    width:33%;
-    height:100%;
-    position:relative;
-  }
-  .bot .apart-line{
-    height:50%;
-    width:0;
-  }
-  .bot p.active{
-    color:#52A3E3;
-  }
+  
   html body .vux-tab .vux-tab-item{
     font-size:16px;
   }
@@ -934,6 +919,22 @@ export default {
   .inner-right .icon-wrapper .icon-name.current-name{
     color:#fff;
   }
-  
+  .bot{
+    background:#F6F6F6;
+    height:44px;
+  }
+  .bot p{
+    color:#3A3A3A;
+    width:33%;
+    height:100%;
+    position:relative;
+  }
+  .bot .apart-line{
+    height:50%;
+    width:0;
+  }
+  .bot p.active{
+    color:#52A3E3;
+  }
   
 </style>

@@ -19,23 +19,24 @@
           <swiper-item v-for="(value,key,outerIndex) in list2" :key="outerIndex" :selected="outerIndex===swiperIndex">
             <!--<div v-show="outerIndex !== swiperIndex" style="height:100%"><loading :show="showLoading" text="Loading"></loading></div>-->
             <div> 
-              <div style="width:99%" v-for="(item, index) in value.sentences" :key="index" class="tab-swiper " :class="item.isActive?'vux-1px sentence-active':'vux-1px-b'" @click="setActive(key,index)">
+              <div style="" v-for="(item, index) in value.sentences" :key="index"  class="tab-swiper " :class="item.isActive?'vux-1px sentence-active':'vux-1px-b'" @click="setActive(key,index)">
                 <div  class="type0 box-start" >
                   <div>
                     <div  class="item-row item-row1">
                       <div class="size1 box-start">
-                          <p class="num color3 box-end">{{item.num}}.</p>
-                          <p v-show="!isShowKeybord" class="color1 en-size1" v-html="wordColor(item.Network_en,value.list[index])"></p>
-                          <p v-show="isShowKeybord" class="color1 en-size1">{{wordLeft(item.Network_en,value.list[index])}} <span class="sentence-word">({{value.list[index].model}})</span> {{wordRight(item.Network_en,value.list[index])}}</p>
+                          <p class="num color3 box-end">{{index+1}}.</p>
+                          <p v-show="!item">{{value.list[index].word_name}}</p>
+                          <p v-show="!isShowKeybord" class="color1 size1" v-html="wordColor(item.Network_en,value.list[index])"></p>
+                          <p v-show="isShowKeybord" class="color1 size1">{{wordLeft(item.Network_en,value.list[index])}} <span class="sentence-word">({{value.list[index].model}})</span> {{wordRight(item.Network_en,value.list[index])}}</p>
                           
                       </div>
                     </div>
                     <div  class="item-row item-row2 ">
                       
                       <div class="item-left">
-                        <p class="color2 size1" >{{item.Network_cn}}</p>
-                        <p v-show="isTip" class="color2 size2 ellipsis rest">英&nbsp;[{{value.list[index].ph_en}}] &nbsp;美&nbsp;[{{value.list[index].ph_am}}]</p>
-                        <p v-show="isTip" class=" color2 size2 ">{{value.list[index].means}}</p>
+                        <p class="color2 size2" >{{item.Network_cn}}</p>
+                        <p v-show="isTip && item.isActive" class="color2 size3 ellipsis rest">英&nbsp;[{{value.list[index].ph_en}}] &nbsp;美&nbsp;[{{value.list[index].ph_am}}]</p>
+                        <p v-show="isTip && item.isActive" class=" color2 size3 ">{{value.list[index].means}}</p>
 
                         <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
                         <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
@@ -62,13 +63,13 @@
     <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup()" @on-show="showPopup()" @on-change="changeWordPopup()" v-model="popupValue" :popup-title="popupTitle">
       
     </popup-picker><!--只初始化一个-->
-    <div class="bot">
+    <div class="bot ">
       <div class="bot-inner box-v-start">
         <div v-show="!isShowKeybord" class="box-v-start algin-center" style="margin-bottom:-10px;" @click="isShowKeybord=true">
           <x-icon style="margin-bottom:-20px;fill:red" type="ios-arrow-up" size="40"></x-icon>
           <x-icon type="ios-arrow-up" style="fill:red" size="40"></x-icon>
         </div>
-        <div v-show="isShowKeybord" class="keybord" >
+        <div v-show="isShowKeybord" class="keybord vux-1px-t" >
           <div class="box-center keybord-item">
             <p @click="getKey('a')">a</p>
             <p @click="getKey('b')">b</p>
@@ -108,8 +109,8 @@
             <p @click="getKey('z')">z</p>
             <p class="chinese" @click="isTip = true">提示</p>
             <p class="chinese" @click="getAnswer">答案</p>
-            <p><x-icon style="fill:red" type="ios-arrow-thin-left" size="30" @click="backspace"></x-icon></p>
-            <p><x-icon style="fill:red" type="ios-close-outline" size="30" @click="isShowKeybord=false"></x-icon></p>
+            <p style="margin-bottom:-10px"><x-icon style="fill:red;" type="ios-arrow-thin-left" size="30" @click="backspace"></x-icon></p>
+            <p style="margin-bottom:-10px"><x-icon style="fill:red;" type="ios-close-outline" size="30" @click="isShowKeybord=false"></x-icon></p>
           </div>
         </div>
       </div>
@@ -156,7 +157,7 @@ export default {
   },
   data () {
     return {
-      sentenceApi : 'http://localhost/word/php/get-sentence.php',
+      sentenceApi : location.hostname==='localhost'?'http://localhost/word/php/get-sentence.php':'/word/php/get-sentence.php',
       isTip: false,
       currentListItem: null,
       isShowKeybord:false,
@@ -306,17 +307,10 @@ export default {
           .then(response=>{
             console.log(response.data)
             that.list2[firstKey].sentences = response.data
+            that.$vux.loading.hide()
           })
-        console.log("that.list2",that.list2)
-        that.list2Clone = Object.assign({},that.list2)
-        console.log("that.list2Clone",that.list2Clone)
-        that.currentList = that.list2[firstKey]
-
-        console.log("that.currentList",that.currentList)
-
         
-        that.currentListClone = Object.assign({},that.currentList);
-        that.$vux.loading.hide()
+        
 
       })
     
@@ -340,6 +334,14 @@ export default {
       },
       getKey: function(key){
         var that = this
+        if(!that.currentListItem){
+          this.$vux.toast.show({
+           text: '请先点击选中一个句子',
+           type: "text",
+           width: '200px'
+          })
+          return
+        }
         if(that.currentListItem.model === "?"){
           that.currentListItem.model = ''
         }
@@ -353,6 +355,9 @@ export default {
         that.currentListItem = obj.list[index]
         for(var i=0,len=sentences.length;i<len;i++){
           var obj2 = sentences[i]
+          if(!obj2){
+            continue
+          }
           obj2.isActive = false
           if(i === index){
             obj2.isActive = true
@@ -425,7 +430,6 @@ export default {
               b = '<span class="sentence-word">' + b + '</span>';
             
             var word = str1 +b + str2;
-            console.log(word)
             return word;
           }
           else{
@@ -486,6 +490,7 @@ export default {
         var that = this;
         that.swiperIndex = index;
         var key = that.list1[index]
+        that.currentListItem = null
         if(that.list2[key].sentences.length > 0){
           return
         }
@@ -498,6 +503,9 @@ export default {
         
         //obj = JSON.stringify(obj)
         //wordArr = JSON.stringify(wordArr)
+        that.$vux.loading.show({
+          text: 'Loading'
+        })
         let param = new URLSearchParams()
         param.append('words', JSON.stringify(wordArr))
         axios({
@@ -515,6 +523,7 @@ export default {
               Vue.set(obj.sentences,i,response.data[i])
             }
             Vue.set(that.list2,key,obj)
+            that.$vux.loading.hide()
           })
         
       },
@@ -593,6 +602,9 @@ export default {
   }
   .sentence-active:before,.sentence-active:after{
     border-color:red!important;
+  }
+  .vux-1px:before{
+    box-sizing:border-box!important;
   }
 </style>
 <style lang="less" scoped>
@@ -729,16 +741,8 @@ export default {
       padding:7px 0 2px 0;
       
   }
-  .type1 .item-row1{
-    margin-bottom:5px;
-    width:80%;
-  } 
-  .type1 .item-row .item-left,.type2 .item-row .item-left{
-    width: 65%;
-    padding-left: 25px;
-  }
-  .type1 .item-row .item-left{
-    width:70%;
+  .item-row2{
+    margin-top:5px;
   }
   .notice{
     height:50px;
@@ -811,14 +815,13 @@ export default {
     width:100%;
   }
   .bot .keybord{
-    margin-top:30px;
     background-color:#fff;
     width:100%;
   }
   .bot .keybord .keybord-item p{
     text-align:center;
-    font-size:24px;
-    padding:5px;
+    font-size:20px;
+    padding:3px;
   }
   .bot .keybord .keybord-item p.chinese{
     font-size:14px;
