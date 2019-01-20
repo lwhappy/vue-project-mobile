@@ -79,7 +79,7 @@ export default {
         that.$router.push({ name: 'word', params: { name:value,type:that.type}})
       }
       else if(that.type === 3){
-        that.$router.push({ name: 'sentence', params: { name:value}})
+        that.$router.push({ name: 'sentenceSelect', params: { name:value}})
       }
       
     },

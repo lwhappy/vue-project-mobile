@@ -11,6 +11,7 @@ import Word from './components/Word'
 import WordIndex from './components/WordIndex'
 import MyWord from './components/MyWord'
 import Sentence from './components/Sentence'
+import SentenceSelect from './components/SentenceSelect'
 
 Vue.use(VueRouter)
 
@@ -38,9 +39,14 @@ const routes = [
       name :"myWord"
   },
   {
-      path: '/sentence/:name',
+      path: '/sentence/:name/:num',
       component: Sentence,
       name :"sentence"
+  },
+  {
+      path: '/sentence-select/:name',
+      component: SentenceSelect,
+      name :"sentenceSelect"
   }
   /*{
       path: '/w',

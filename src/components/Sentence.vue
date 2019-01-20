@@ -25,18 +25,17 @@
                     <div  class="item-row item-row1">
                       <div class="size1 box-start">
                           <p class="num color3 box-end">{{index+1}}.</p>
-                          <p v-show="!item">{{value.list[index].word_name}}</p>
                           <p v-show="!isShowKeybord" class="color1 size1" v-html="wordColor(item.Network_en,value.list[index])"></p>
-                          <p v-show="isShowKeybord" class="color1 size1">{{wordLeft(item.Network_en,value.list[index])}} <span class="sentence-word">({{value.list[index].model}})</span> {{wordRight(item.Network_en,value.list[index])}}</p>
+                          <p v-show="isShowKeybord" class="color1 size1">{{wordLeft(item.Network_en,value.list[index])}} <span class="sentence-word">(&nbsp;{{value.list[index].model}}&nbsp;)</span> {{wordRight(item.Network_en,value.list[index])}}</p>
                           
                       </div>
                     </div>
                     <div  class="item-row item-row2 ">
                       
                       <div class="item-left">
-                        <p class="color2 size2" >{{item.Network_cn}}</p>
-                        <p v-show="isTip && item.isActive" class="color2 size3 ellipsis rest">英&nbsp;[{{value.list[index].ph_en}}] &nbsp;美&nbsp;[{{value.list[index].ph_am}}]</p>
-                        <p v-show="isTip && item.isActive" class=" color2 size3 ">{{value.list[index].means}}</p>
+                        <p class="color3 size2" >{{item.Network_cn}}</p>
+                        <p v-show="!isShowKeybord ||(isShowKeybord && (isTip || (value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase())))" class="color3 size3 ellipsis rest">英&nbsp;[{{value.list[index].ph_en}}] &nbsp;美&nbsp;[{{value.list[index].ph_am}}]</p>
+                        <p v-show="!isShowKeybord ||(isShowKeybord && (isTip || (value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase())))" class=" color3 size3 ">{{value.list[index].means}}</p>
 
                         <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
                         <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
@@ -46,8 +45,8 @@
                     </div>
                   </div>
 
-                  <p class="item-right" v-show="value.list[index].model === value.list[index].word_name"><icon  type="success"></icon></p>
-                  <p class="item-right" v-show="value.list[index].model !=='?' && value.list[index].model !== value.list[index].word_name"><icon  type="warn"></icon></p>
+                  <p class="item-right" v-show="value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase()"><icon  type="success"></icon></p>
+                  <p class="item-right" v-show="value.list[index].model !=='?' && value.list[index].model.toLowerCase() !== value.list[index].word_name.toLowerCase()"><icon  type="warn"></icon></p>
                 </div>
                  
                
@@ -66,51 +65,53 @@
     <div class="bot ">
       <div class="bot-inner box-v-start">
         <div v-show="!isShowKeybord" class="box-v-start algin-center" style="margin-bottom:-10px;" @click="isShowKeybord=true">
-          <x-icon style="margin-bottom:-20px;fill:red" type="ios-arrow-up" size="40"></x-icon>
-          <x-icon type="ios-arrow-up" style="fill:red" size="40"></x-icon>
+          <x-icon style="margin-bottom:-20px;fill:#f9832a" type="ios-arrow-up" size="40"></x-icon>
+          <x-icon type="ios-arrow-up" style="fill:#f9832a" size="40"></x-icon>
         </div>
         <div v-show="isShowKeybord" class="keybord vux-1px-t" >
-          <div class="box-center keybord-item">
+          <div class="box-justify keybord-item">
             <p @click="getKey('a')">a</p>
             <p @click="getKey('b')">b</p>
             <p @click="getKey('c')">c</p>
             <p @click="getKey('d')">d</p>
             <p @click="getKey('e')">e</p>
-          </div>
-          <div class="box-center keybord-item">
             <p @click="getKey('f')">f</p>
+          </div>
+          <div class="box-justify keybord-item">
+            
             <p @click="getKey('g')">g</p>
             <p @click="getKey('h')">h</p>
             <p @click="getKey('i')">i</p>
             <p @click="getKey('j')">j</p>
-          </div>
-          <div class="box-center keybord-item">
             <p @click="getKey('k')">k</p>
             <p @click="getKey('l')">l</p>
+          </div>
+          <div class="box-justify keybord-item">
+            
             <p @click="getKey('m')">m</p>
             <p @click="getKey('n')">n</p>
             <p @click="getKey('o')">o</p>
-          </div>
-          <div class="box-center keybord-item">
             <p @click="getKey('p')">p</p>
             <p @click="getKey('q')">q</p>
             <p @click="getKey('r')">r</p>
+          </div>
+          <div class="box-justify keybord-item">
+            
             <p @click="getKey('s')">s</p>
             <p @click="getKey('t')">t</p>
-          </div>
-          <div class="box-center keybord-item">
             <p @click="getKey('u')">u</p>
             <p @click="getKey('v')">v</p>
             <p @click="getKey('w')">w</p>
             <p @click="getKey('x')">x</p>
-            <p @click="getKey('y')">y</p>
           </div>
-          <div class="box-center keybord-item">
+          
+          <div class="box-justify keybord-item">
+            <p @click="getKey('y')">y</p>
             <p @click="getKey('z')">z</p>
-            <p class="chinese" @click="isTip = true">提示</p>
-            <p class="chinese" @click="getAnswer">答案</p>
-            <p style="margin-bottom:-10px"><x-icon style="fill:red;" type="ios-arrow-thin-left" size="30" @click="backspace"></x-icon></p>
-            <p style="margin-bottom:-10px"><x-icon style="fill:red;" type="ios-close-outline" size="30" @click="isShowKeybord=false"></x-icon></p>
+            <p style="border:none" class="chinese" :style="isTip?'color:blue':''" @click="isTip = !isTip">提示</p>
+            <p style="border:none" class="chinese" @click="getAnswer">答案</p>
+            <p style="margin-bottom:-10px;border:none"><x-icon style="fill:#f9832a;" type="ios-arrow-thin-left" size="30" @click="backspace"></x-icon></p>
+            <p style="margin-bottom:-10px;border:none"><x-icon style="fill:#f9832a;" type="ios-close-outline" size="30" @click="isShowKeybord=false"></x-icon></p>
           </div>
         </div>
       </div>
@@ -160,6 +161,7 @@ export default {
       sentenceApi : location.hostname==='localhost'?'http://localhost/word/php/get-sentence.php':'/word/php/get-sentence.php',
       isTip: false,
       currentListItem: null,
+      currentListItemIndex: 0,
       isShowKeybord:false,
       newCategory: '',
       activeWord: null,
@@ -168,6 +170,7 @@ export default {
       confirmTitle: '添加到我的分类',
       isShowConfirm: false,
       type : Number(this.$route.params.type) || 0,
+      num : Number(this.$route.params.num) || 0,
       index01: 0,
       list1: [],
       list2: {},
@@ -212,6 +215,7 @@ export default {
     console.log("type",this.type)
     var that = this;
     var name = that.$router.history.current.params.name;
+    
     const api = 'static/cet4/cet4-'+name+'.js';
     
     
@@ -296,6 +300,7 @@ export default {
         //wordArr = JSON.stringify(wordArr)
         let param = new URLSearchParams()
         param.append('words', JSON.stringify(wordArr))
+        param.append('num', that.num)
         axios({
             url:that.sentenceApi,
             method: 'post',
@@ -307,6 +312,21 @@ export default {
           .then(response=>{
             console.log(response.data)
             that.list2[firstKey].sentences = response.data
+            for(var i = 0, len = that.list2[firstKey].sentences.length; i < len; i++) {
+              if(that.list2[firstKey].sentences[i] === "null"){
+                that.list2[firstKey].sentences.splice(i,1)
+                that.list2[firstKey].list.splice(i,1)
+                i--
+              }
+            }
+            that.currentListItem = that.list2[firstKey].list[0]
+            that.currentListItemIndex = 0
+            if(that.list2[firstKey].sentences[0]){
+              that.list2[firstKey].sentences[0].isActive = true
+              that.currentListItem = that.list2[firstKey].list[0]
+              that.currentListItemIndex = 0
+            }
+            
             that.$vux.loading.hide()
           })
         
@@ -320,6 +340,19 @@ export default {
       getAnswer: function(){
         var that  = this
         that.currentListItem.model = that.currentListItem.word_name
+        var key = that.list1[that.swiperIndex]
+        that.list2[key].sentences[that.currentListItemIndex].isActive = false
+        that.currentListItemIndex ++
+        that.list2[key].sentences[that.currentListItemIndex].isActive = true
+        that.currentListItem = that.list2[key].list[that.currentListItemIndex]
+        setTimeout(function(){
+          var target = $(".vux-swiper-item[selected=selected]")
+          var top = target.find(".sentence-active").offset().top - 60
+          var scrollTop = target.scrollTop()
+          //$(".sentence-active").parents(".vux-swiper-item").scrollTop(scrollTop+top)
+
+          target.animate({scrollTop: scrollTop+top}, 800)
+        },1000)
       },
       backspace:function(){
         var that = this
@@ -346,6 +379,21 @@ export default {
           that.currentListItem.model = ''
         }
         that.currentListItem.model += key 
+        if(that.currentListItem.model === that.currentListItem.word_name){
+          var key = that.list1[that.swiperIndex]
+          that.list2[key].sentences[that.currentListItemIndex].isActive = false
+          that.currentListItemIndex ++
+          that.list2[key].sentences[that.currentListItemIndex].isActive = true
+          that.currentListItem = that.list2[key].list[that.currentListItemIndex]
+          setTimeout(function(){
+            var target = $(".vux-swiper-item[selected=selected]")
+            var top = target.find(".sentence-active").offset().top - 60
+            var scrollTop = target.scrollTop()
+            //$(".sentence-active").parents(".vux-swiper-item").scrollTop(scrollTop+top)
+
+            target.animate({scrollTop: scrollTop+top}, 800)
+          },1000)
+        }
       },
       setActive: function(key,index){
         
@@ -353,6 +401,7 @@ export default {
         var obj = that.list2[key]
         var sentences = obj.sentences
         that.currentListItem = obj.list[index]
+        that.currentListItemIndex = index
         for(var i=0,len=sentences.length;i<len;i++){
           var obj2 = sentences[i]
           if(!obj2){
@@ -372,11 +421,13 @@ export default {
         var that = this
         if(obj){
           var b = obj.word_name
+          b = b.toLowerCase()
         }
         
         if(b){
-          if(a && a.match(b) !== null){
-            var index = a.indexOf(b);
+          var c = a.toLowerCase()
+          if(c && c.match(b) !== null){
+            var index = c.indexOf(b);
             var str1 = a.substring(0,index );
             
             return str1;
@@ -393,11 +444,13 @@ export default {
         var that = this
         if(obj){
           var b = obj.word_name
+          b = b.toLowerCase()
         }
         
         if(b){
-          if(a && a.match(b) !== null){
-            var index = a.indexOf(b);
+          var c = a.toLowerCase()
+          if(c && c.match(b) !== null){
+            var index = c.indexOf(b);
             var str2 = a.substring(index+b.length);
             return str2;
           }
@@ -413,11 +466,14 @@ export default {
         var that = this
         if(obj){
           var b = obj.word_name
+          b = b.toLowerCase()
         }
         
         if(b){
-          if(a && a.match(b) !== null){
-            var index = a.indexOf(b);
+          var c = a.toLowerCase()
+          if(c && c.match(b) !== null){
+
+            var index = c.indexOf(b);
             var str1 = a.substring(0,index );
             if(str1){
               str1 = "<span>" + str1 + "</span>";
@@ -427,7 +483,7 @@ export default {
               str2 = "<span>" + str2 + "</span>"
             }
             
-              b = '<span class="sentence-word">' + b + '</span>';
+              b = '<span class="sentence-word">' + a.substr(index,b.length) + '</span>';
             
             var word = str1 +b + str2;
             return word;
@@ -490,8 +546,26 @@ export default {
         var that = this;
         that.swiperIndex = index;
         var key = that.list1[index]
-        that.currentListItem = null
+        
         if(that.list2[key].sentences.length > 0){
+          if(that.list2[key].sentences[0]){
+            that.currentListItem = that.list2[key].list[0]
+            that.currentListItemIndex = 0
+          }
+          for(var i=0,len=that.list2[key].sentences.length;i<len;i++){
+            that.list2[key].sentences[i].isActive = false
+            if(i === that.currentListItemIndex){
+              that.list2[key].sentences[i].isActive = true
+            }
+          }
+          setTimeout(function(){
+            var target = $(".vux-swiper-item[selected=selected]")
+            var top = target.find(".sentence-active").offset().top - 60
+            var scrollTop = target.scrollTop()
+            //$(".sentence-active").parents(".vux-swiper-item").scrollTop(scrollTop+top)
+
+            target.animate({scrollTop: scrollTop+top}, 800)
+          },1000)
           return
         }
         var list = that.list2[key].list
@@ -508,6 +582,7 @@ export default {
         })
         let param = new URLSearchParams()
         param.append('words', JSON.stringify(wordArr))
+        param.append('num', that.num)
         axios({
             url:that.sentenceApi,
             method: 'post',
@@ -522,8 +597,33 @@ export default {
             for(var i=0,len=response.data.length;i<len;i++){
               Vue.set(obj.sentences,i,response.data[i])
             }
+            for(var i = 0, len = obj.sentences.length; i < len; i++) {
+              if(obj.sentences[i] === 'null'){
+                obj.sentences.splice(i,1)
+                obj.list.splice(i,1)
+                i--
+              }
+            }
             Vue.set(that.list2,key,obj)
+            if(that.list2[key].sentences[0]){
+              that.currentListItem = that.list2[key].list[0]
+              that.currentListItemIndex = 0
+            }
+            for(var i=0,len=that.list2[key].sentences.length;i<len;i++){
+              that.list2[key].sentences[i].isActive = false
+              if(i === that.currentListItemIndex){
+                that.list2[key].sentences[i].isActive = true
+              }
+            }
             that.$vux.loading.hide()
+            setTimeout(function(){
+              var target = $(".vux-swiper-item[selected=selected]")
+              var top = target.find(".sentence-active").offset().top - 60
+              var scrollTop = target.scrollTop()
+              //$(".sentence-active").parents(".vux-swiper-item").scrollTop(scrollTop+top)
+
+              target.animate({scrollTop: scrollTop+top}, 800)
+            },1000)
           })
         
       },
@@ -591,17 +691,17 @@ export default {
     font-size:24px;
   }
   .vux-swiper-item .tab-swiper:last-of-type{
-    margin-bottom:50px;
+    margin-bottom:250px;
   }
   
   html body .weui-icon-clear{
     display:block!important;
   }
   .sentence-word{
-    color:blue;
+    color:#5454d8;
   }
   .sentence-active:before,.sentence-active:after{
-    border-color:red!important;
+    border-color:#f9832a!important;
   }
   .vux-1px:before{
     box-sizing:border-box!important;
@@ -705,6 +805,9 @@ export default {
   .item-operate .operate-row .operate-btn{
     padding:0 10px;
   }
+  .item-row{
+    line-height:22px;
+  }
   .item-row .field-date{
     /*background:url(../assets/pencil.png) right center no-repeat;*/
   }
@@ -742,7 +845,7 @@ export default {
       
   }
   .item-row2{
-    margin-top:5px;
+    margin-top:10px;
   }
   .notice{
     height:50px;
@@ -817,14 +920,28 @@ export default {
   .bot .keybord{
     background-color:#fff;
     width:100%;
+    padding-top:10px;
+  }
+  .bot .keybord .keybord-item{
+    margin-bottom:10px;
+    padding:0 10px;
   }
   .bot .keybord .keybord-item p{
     text-align:center;
     font-size:20px;
     padding:3px;
+    border: solid 1px #52A3E3;
+    border-radius: 10px;
+    width:10%;
   }
   .bot .keybord .keybord-item p.chinese{
     font-size:14px;
+  }
+  @media screen and (min-width: 500px) and (max-width:1000px) {
+      .bot .keybord .keybord-item{
+        margin-bottom:20px;
+        padding:0 20px;
+      }
   }
 
 </style>
