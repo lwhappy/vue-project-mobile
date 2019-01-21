@@ -34,6 +34,7 @@
                       
                       <div class="item-left">
                         <p class="color3 size2" >{{item.Network_cn}}</p>
+                        <p v-show="item.isActive && isAnswer">{{ value.list[index].word_name }}</p>
                         <p v-show="!isShowKeybord ||(isShowKeybord && (isTip || (value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase())))" class="color3 size3 ellipsis rest">英&nbsp;[{{value.list[index].ph_en}}] &nbsp;美&nbsp;[{{value.list[index].ph_am}}]</p>
                         <p v-show="!isShowKeybord ||(isShowKeybord && (isTip || (value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase())))" class=" color3 size3 ">{{value.list[index].means}}</p>
 
@@ -108,8 +109,8 @@
           <div class="box-justify keybord-item">
             <p @click="getKey('y')">y</p>
             <p @click="getKey('z')">z</p>
-            <p style="border:none" class="chinese" :style="isTip?'color:blue':''" @click="isTip = !isTip">提示</p>
-            <p style="border:none" class="chinese" @click="getAnswer">答案</p>
+            <p style="border:none" class="chinese" :style="isTip?'color:#5454d8':''" @click="isTip = !isTip;isAnswer = false">提示</p>
+            <p style="border:none" class="chinese" :style="isAnswer?'color:#5454d8':''" @click="getAnswer">答案</p>
             <p style="margin-bottom:-10px;border:none"><x-icon style="fill:#f9832a;" type="ios-arrow-thin-left" size="30" @click="backspace"></x-icon></p>
             <p style="margin-bottom:-10px;border:none"><x-icon style="fill:#f9832a;" type="ios-close-outline" size="30" @click="isShowKeybord=false"></x-icon></p>
           </div>
@@ -159,7 +160,9 @@ export default {
   data () {
     return {
       sentenceApi : location.hostname==='localhost'?'http://localhost/word/php/get-sentence.php':'/word/php/get-sentence.php',
+      //sentenceApi : 'http://www.pangfanqie.com/word/php/get-sentence.php',
       isTip: false,
+      isAnswer: false,
       currentListItem: null,
       currentListItemIndex: 0,
       isShowKeybord:false,
@@ -339,20 +342,14 @@ export default {
   methods: {
       getAnswer: function(){
         var that  = this
-        that.currentListItem.model = that.currentListItem.word_name
-        var key = that.list1[that.swiperIndex]
-        that.list2[key].sentences[that.currentListItemIndex].isActive = false
-        that.currentListItemIndex ++
-        that.list2[key].sentences[that.currentListItemIndex].isActive = true
-        that.currentListItem = that.list2[key].list[that.currentListItemIndex]
-        setTimeout(function(){
-          var target = $(".vux-swiper-item[selected=selected]")
-          var top = target.find(".sentence-active").offset().top - 60
-          var scrollTop = target.scrollTop()
-          //$(".sentence-active").parents(".vux-swiper-item").scrollTop(scrollTop+top)
-
-          target.animate({scrollTop: scrollTop+top}, 800)
-        },1000)
+        if(that.isAnswer){
+          that.isAnswer = false
+          that.isTip = false
+        }
+        else{
+          that.isAnswer = true
+          that.isTip = true
+        }
       },
       backspace:function(){
         var that = this
