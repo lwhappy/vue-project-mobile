@@ -111,8 +111,8 @@
             <p @click="getKey('z')">z</p>
             <p style="border:none" class="chinese" :style="isTip?'color:#5454d8':''" @click="isTip = !isTip;isAnswer = false">提示</p>
             <p style="border:none" class="chinese" :style="isAnswer?'color:#5454d8':''" @click="getAnswer">答案</p>
-            <p style="margin-bottom:-10px;border:none"><x-icon style="fill:#f9832a;" type="ios-arrow-thin-left" size="30" @click="backspace"></x-icon></p>
-            <p style="margin-bottom:-10px;border:none"><x-icon style="fill:#f9832a;" type="ios-close-outline" size="30" @click="isShowKeybord=false"></x-icon></p>
+            <p style="margin-bottom:2px;border:none"><x-icon style="fill:#f9832a;" type="ios-arrow-thin-left" size="30" @click="backspace"></x-icon></p>
+            <p style="margin-bottom:2px;border:none"><x-icon style="fill:#f9832a;" type="ios-close-outline" size="30" @click="isShowKeybord=false"></x-icon></p>
           </div>
         </div>
       </div>
@@ -275,7 +275,7 @@ export default {
                 console.log(e,words[o])
                 continue;
               }
-
+             
               wordObj.sentence = JSON.parse(wordObj.sentence)
               wordObj.showSentence = false
               wordObj.symbols = JSON.parse(wordObj.symbols)
@@ -377,6 +377,7 @@ export default {
         }
         that.currentListItem.model += key 
         if(that.currentListItem.model === that.currentListItem.word_name){
+          that.isAnswer = false
           var key = that.list1[that.swiperIndex]
           that.list2[key].sentences[that.currentListItemIndex].isActive = false
           that.currentListItemIndex ++
@@ -925,10 +926,11 @@ export default {
   }
   .bot .keybord .keybord-item p{
     text-align:center;
-    font-size:20px;
-    padding:3px;
+    font-size:16px;
+    height:20px;
+    line-height:20px;
     border: solid 1px #52A3E3;
-    border-radius: 10px;
+    border-radius: 6px;
     width:10%;
   }
   .bot .keybord .keybord-item p.chinese{
@@ -938,6 +940,15 @@ export default {
       .bot .keybord .keybord-item{
         margin-bottom:20px;
         padding:0 20px;
+      }
+      .bot .keybord .keybord-item p{
+        text-align:center;
+        font-size:20px;
+        height:26px;
+        line-height:26px;
+        border: solid 1px #52A3E3;
+        border-radius: 10px;
+        width:10%;
       }
   }
 
