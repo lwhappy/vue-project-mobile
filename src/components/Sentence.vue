@@ -70,6 +70,7 @@
           <x-icon type="ios-arrow-up" style="fill:#f9832a" size="40"></x-icon>
         </div>
         <div v-show="isShowKeybord" class="keybord vux-1px-t" >
+          <div class="box-center" style="margin:0 0 5px 0">{{ currentListItem.model }}</div>
           <div class="box-justify keybord-item">
             <p @click="getKey('a')">a</p>
             <p @click="getKey('b')">b</p>
@@ -652,7 +653,7 @@ export default {
 
 
   html body .tab-swiper{
-    padding:10px 0 15px 0;
+    padding:10px 0 10px 0;
   }
   html body .vux-no-group-title{
     margin-top:0;
