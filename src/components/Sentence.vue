@@ -36,7 +36,7 @@
                         <p class="color3 size2" >{{item.Network_cn}}</p>
                         <p v-show="item.isActive && isAnswer">{{ value.list[index].word_name }}</p>
                         <p v-show="!isShowKeybord ||(isShowKeybord && (isTip || (value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase())))" class="color3 size3 ellipsis rest">英&nbsp;[{{value.list[index].ph_en}}] &nbsp;美&nbsp;[{{value.list[index].ph_am}}]</p>
-                        <p v-show="!isShowKeybord ||(isShowKeybord && (isTip || (value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase())))" class=" color3 size3 ">{{value.list[index].means}}</p>
+                        <p v-show="!isShowKeybord ||(isShowKeybord && (isTip || (value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase())))" class=" color3 size3 " v-html="value.list[index].means"></p>
 
                         <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
                         <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
@@ -65,12 +65,12 @@
     </popup-picker><!--只初始化一个-->
     <div class="bot ">
       <div class="bot-inner box-v-start">
-        <div v-show="!isShowKeybord" class="box-v-start algin-center" style="margin-bottom:-10px;" @click="isShowKeybord=true">
+        <div v-show="!isShowKeybord" class="box-v-start algin-center" style="margin-bottom:-10px;" @click="showKeyBord">
           <x-icon style="margin-bottom:-20px;fill:#f9832a" type="ios-arrow-up" size="40"></x-icon>
           <x-icon type="ios-arrow-up" style="fill:#f9832a" size="40"></x-icon>
         </div>
         <div v-show="isShowKeybord" class="keybord vux-1px-t" >
-          <div class="box-center" style="margin:0 0 5px 0">{{ currentListItem.model }}</div>
+          <div v-if="currentListItem" class="box-center" style="margin:0 0 5px 0">{{ currentListItem.model }}</div>
           <div class="box-justify keybord-item">
             <p @click="getKey('a')">a</p>
             <p @click="getKey('b')">b</p>
@@ -160,8 +160,8 @@ export default {
   },
   data () {
     return {
-      sentenceApi : location.hostname==='localhost'?'http://localhost/word/php/get-sentence.php':'/word/php/get-sentence.php',
-      //sentenceApi : 'http://www.pangfanqie.com/word/php/get-sentence.php',
+      // sentenceApi : location.hostname==='localhost'?'http://localhost/word/php/get-sentence.php':'/word/php/get-sentence.php',
+      sentenceApi : 'http://www.pangfanqie.com/word/php/get-sentence.php',
       isTip: false,
       isAnswer: false,
       currentListItem: null,
@@ -280,7 +280,15 @@ export default {
               wordObj.sentence = JSON.parse(wordObj.sentence)
               wordObj.showSentence = false
               wordObj.symbols = JSON.parse(wordObj.symbols)
-              wordObj.means = wordObj.symbols[0]["parts"][0].part + wordObj.symbols[0]["parts"][0].means.join(";")
+              wordObj.means = ''
+              for (var j = 0; j < wordObj.symbols[0]["parts"].length; j++) {
+                var temp = wordObj.symbols[0]["parts"][j].part + wordObj.symbols[0]["parts"][j].means.join(";")
+                if (j < wordObj.symbols[0]["parts"].length - 1) {
+                  temp += '<br>'
+                }
+                wordObj.means += temp
+              }
+              // wordObj.means = wordObj.symbols[0]["parts"][0].part + wordObj.symbols[0]["parts"][0].means.join(";")
               wordObj.ph_am = wordObj.symbols[0].ph_am
               wordObj.ph_en = wordObj.symbols[0].ph_en
               wordObj.isShow = true;
@@ -341,6 +349,17 @@ export default {
     
   },
   methods: {
+      showKeyBord: function() {
+        this.isShowKeybord=true
+        setTimeout(function(){
+          var target = $(".vux-swiper-item[selected=selected]")
+          var top = target.find(".sentence-active").offset().top - 60
+          var scrollTop = target.scrollTop()
+          //$(".sentence-active").parents(".vux-swiper-item").scrollTop(scrollTop+top)
+
+          target.animate({scrollTop: scrollTop+top}, 800)
+        },1000)
+      },
       getAnswer: function(){
         var that  = this
         if(that.isAnswer){
@@ -545,17 +564,24 @@ export default {
         var that = this;
         that.swiperIndex = index;
         var key = that.list1[index]
-        
+
         if(that.list2[key].sentences.length > 0){
-          if(that.list2[key].sentences[0]){
+          
+          var haveActive = false
+          for(var i=that.list2[key].sentences.length-1;i>=0;i--){
+            that.list2[key].sentences[i].isActive = false
+            if(that.list2[key].list[i].model !== "?"){
+              that.list2[key].sentences[i].isActive = true
+              haveActive = true
+              that.currentListItem = that.list2[key].list[i]
+              that.currentListItemIndex = i
+              break
+            }
+          }
+          if(!haveActive && that.list2[key].sentences[0]){
             that.currentListItem = that.list2[key].list[0]
             that.currentListItemIndex = 0
-          }
-          for(var i=0,len=that.list2[key].sentences.length;i<len;i++){
-            that.list2[key].sentences[i].isActive = false
-            if(i === that.currentListItemIndex){
-              that.list2[key].sentences[i].isActive = true
-            }
+            that.list2[key].sentences[0].isActive = true
           }
           setTimeout(function(){
             var target = $(".vux-swiper-item[selected=selected]")
@@ -604,17 +630,15 @@ export default {
               }
             }
             Vue.set(that.list2,key,obj)
+            for(var i=that.list2[key].sentences.length-1;i>=0;i--){
+              that.list2[key].sentences[i].isActive = false
+            }
             if(that.list2[key].sentences[0]){
               that.currentListItem = that.list2[key].list[0]
               that.currentListItemIndex = 0
+              that.list2[key].sentences[0].isActive = true
             }
-            for(var i=0,len=that.list2[key].sentences.length;i<len;i++){
-              that.list2[key].sentences[i].isActive = false
-              if(i === that.currentListItemIndex){
-                that.list2[key].sentences[i].isActive = true
-              }
-            }
-            that.$vux.loading.hide()
+            
             setTimeout(function(){
               var target = $(".vux-swiper-item[selected=selected]")
               var top = target.find(".sentence-active").offset().top - 60
@@ -623,6 +647,8 @@ export default {
 
               target.animate({scrollTop: scrollTop+top}, 800)
             },1000)
+            that.$vux.loading.hide()
+            
           })
         
       },

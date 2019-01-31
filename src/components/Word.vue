@@ -33,7 +33,7 @@
                     
                     <div class="item-left">
                       <p class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
-                      <p class=" color2 size3 ">{{item.means}}</p>
+                      <p class=" color2 size3 " v-html="item.means"></p>
                       <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
                       <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
                       <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_cn}}</p>-->
@@ -45,7 +45,7 @@
                  <div class="type1" v-if="type === 1" >
                    <div class="item-row item-row1 box-start">
                     <p class="num color3 ">{{item.num}}.</p>
-                    <p class=" color1 size3 rest">{{item.means}}</p>
+                    <p class=" color1 size3 rest" v-html="item.means"></p>
                    </div>
                    <div  class="box-start item-row" >
                        
@@ -347,7 +347,15 @@ export default {
               wordObj.sentence = JSON.parse(wordObj.sentence)
               wordObj.showSentence = false
               wordObj.symbols = JSON.parse(wordObj.symbols)
-              wordObj.means = wordObj.symbols[0]["parts"][0].part + wordObj.symbols[0]["parts"][0].means.join(";")
+              wordObj.means = ''
+              for (var j = 0; j < wordObj.symbols[0]["parts"].length; j++) {
+                var temp = wordObj.symbols[0]["parts"][j].part + wordObj.symbols[0]["parts"][j].means.join(";")
+                if (j < wordObj.symbols[0]["parts"].length - 1) {
+                  temp += '<br>'
+                }
+                wordObj.means += temp
+              }
+              // wordObj.means = wordObj.symbols[0]["parts"][0].part + wordObj.symbols[0]["parts"][0].means.join(";")
               wordObj.ph_am = wordObj.symbols[0].ph_am
               wordObj.ph_en = wordObj.symbols[0].ph_en
               wordObj.isShow = true;
@@ -544,6 +552,7 @@ export default {
         that.itemIndex = index;
         if(that.type === 1){
           that.popupTitle = that.currentList.list[that.itemIndex].means;
+          that.popupTitle = that.popupTitle.replace(/<br>/g,'|')
         }
         else if(that.type === 2){
           that.popupTitle = that.currentList.list[that.itemIndex].word_name;

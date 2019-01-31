@@ -66,6 +66,16 @@ export default {
   created(){
     var that = this;
     that.$vux.loading.hide();
+    if(navigator.userAgent.toLowerCase().match("windows") !== null){
+      this.$vux.toast.show({
+       text: '使用手机或平板浏览此网站效果更佳',
+       type: "text",
+       width: '600px',
+       position: 'top',
+       time: 20 * 1000
+      })
+    }
+    
   },
   methods: {
     myCatgory: function(){
