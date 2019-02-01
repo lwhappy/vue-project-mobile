@@ -8,6 +8,7 @@ import App from './App'
 //import Tab from './components/Tab'
 //import AlertDemo from './components/HelloFromVux'
 import Word from './components/Word'
+import Word2 from './components/Word2'
 import WordIndex from './components/WordIndex'
 import MyWord from './components/MyWord'
 import Sentence from './components/Sentence'
@@ -32,6 +33,11 @@ const routes = [
       path: '/word/:name/:type',
       component: Word,
       name :"word"
+  },
+  {
+      path: '/word2/:name/:type',
+      component: Word2,
+      name :"word2"
   },
   {
       path: '/my-word',
