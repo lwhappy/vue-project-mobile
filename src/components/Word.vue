@@ -206,7 +206,7 @@ export default {
       myCategory: [],
       confirmTitle: '添加到我的分类',
       isShowConfirm: false,
-      type : Number(this.$route.params.type) || 0,
+      type : Number(this.$route.params.type)-1 || 0,
       index01: 0,
       list1: [],
       list2: {},
