@@ -19,28 +19,29 @@
           <swiper-item  v-for="(item, index) in list2[activeKey].list" :key="index" :selected="index===swiperIndex">
             <!--<div v-show="outerIndex !== swiperIndex" style="height:100%"><loading :show="showLoading" text="Loading"></loading></div>-->
             <div style="height:100%;overflow:hidden"> 
-              <div class="tab-swiper box-v-center" style="height:100%;" v-show="item.isShow">
+              <div class="tab-swiper box-v-center align-stretch" style="height:100%;" v-show="item.isShow">
                 <div  class="item-row item-row1" style="padding:10px">
                   <div class="size1 box-center">
                       <p class="num color3 box-end">{{item.num}}.</p>
-                      <p class="color1 en-size1">{{item.word_name}}</p>
-                      <p @click="addToCategory(item)" style="margin-left:20px;font-size:20px">+</p>
+                      <p class="color1 big-size1">{{item.word_name}}</p>
+                      <p class="color3 size3" @click="addToCategory(item)" style="margin-left:20px;font-size:20px">+</p>
                       
                   </div>
-                  <p class="color2 size3 ellipsis box-start">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
-                  <p class=" color2 size3 box-start" v-html="item.means"></p>
-                  
+                  <p class="color2 size2 ellipsis box-start item-row">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
+                  <p class=" color2 size1 box-start item-row" v-html="item.means"></p>
+                  <p class=" color2 size2 box-start item-row"><span class="color3 size3" style="margin-right:5px">我的备注：</span> <span class="color2 size2">{{remark[item.word_name]}}</span></p>
+                  <p class=" color3 size3 box-start item-row" @click="editRemark(item.word_name)">修改备注</p>
                 </div>
-                <div class="rest" style="margin-top:20px;overflow:auto;padding:10px">
+                <div class="rest" style="overflow:auto;padding:10px">
                   <template v-if="!item.moreSentence">
-                    <p  class="sentence sentence1 color3 size3 box-start">{{item.sentence.Network_en}}</p>
-                    <p  class="sentence sentence2 color3 size3 box-start">{{item.sentence.Network_cn}}</p>
+                    <p  class="sentence sentence1 color2 size1 box-start">{{item.sentence.Network_en}}</p>
+                    <p  class="sentence sentence2 color3 size2 box-start">{{item.sentence.Network_cn}}</p>
                     <p class="box-center color3 size3" @click="getMoreSentence(item)">more</p>
                   </template>
                   <div v-if="item.moreSentence" style="overflow:auto;">
-                    <div v-for="(sentenceItem,sentenceIndex) in item.moreSentence" :key="sentenceIndex" class="sentence sentence2 color3 size3 box-v-center align-start" style="padding:10px 0">
-                      <p>{{sentenceItem.Network_en}}</p>
-                      <p>{{sentenceItem.Network_cn}}</p>
+                    <div v-for="(sentenceItem,sentenceIndex) in item.moreSentence" :key="sentenceIndex" class="sentence sentence2 color3 size3 box-v-center align-start" style="padding:5px 0">
+                      <p class="sentence sentence1 color2 size1 box-start">{{sentenceItem.Network_en}}</p>
+                      <p class="sentence sentence2 color3 size2 box-start">{{sentenceItem.Network_cn}}</p>
                     </div>
                   </div>
                 </div>
@@ -50,25 +51,13 @@
           <!--</scroller>-->
         </swiper>
     </div>
-    <div v-transfer-dom>
-      <confirm v-model="isShowConfirm"
-      ref="confirm1"
-      :title="confirmTitle"
-      @on-cancel="onCancel"
-      @on-confirm="onConfirm"
-      @on-show="onShow"
-      @on-hide="onHide">
-        <div style="max-height:300px;overflow:auto">
-          <div style="height:24px" v-for="(categoryItem,categoryIndex) in myCategory" :key="categoryItem.createTime" class="box-justify" @click="selectCategory(categoryItem)">
-            <p>{{categoryItem.name}}</p>
-            <x-icon v-show="categoryItem === activeCategory" style="fill:#F70968;"   type="ios-checkmark-empty" size="28" ></x-icon>
-          </div>
-          <div class="box-start">
-            <group><x-input v-model="newCategory"></x-input></group><p style="width:50px" @click="addNewCategory">添加</p>
-          </div>
-        </div>
-      </confirm>
-    </div>
+    <confirm v-model="isShowRemarkConfirm"
+    ref="confirm2"
+    :title="remarkConfirmTitle"
+    @on-confirm="saveRemark">
+      <group><x-input placeholder="备注" v-model="remark[currentWord]"></x-input></group>
+      <p style="margin-top:10px" class="color3 size3">注：使用备注请关闭无痕浏览模式，备注只保存在本地，清除浏览器数据后备注也会被清除</p>
+    </confirm>  
   </div>
 </template>
 <script>
@@ -108,6 +97,11 @@ export default {
   },
   data () {
     return {
+      currentWord:'',
+      isShowRemarkConfirm: false,
+      remarkConfirmTitle: '',
+      remark:{},
+      currentLabel:{},
       sentenceApi : 'http://www.pangfanqie.com/word/php/get-oneword-sentence.php',
       labelIndex: 0,
       activeKey: '',
@@ -140,7 +134,7 @@ export default {
       searchInputValue : "",
       keybord:["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"],
       isShowRight : false,
-      readonly : true,
+      readonly : false,
                
       /*english : {
         wordList : [[]],
@@ -152,31 +146,7 @@ export default {
     }
   },
   watch : {
-    searchInputValue : function(val,oldVal){
-      var that = this;
-      console.log(val)
-      that.currentList.list = that.currentListClone.list;
-        
-      if(val){
-        var num = 0;
-        for(var i=0,len=that.currentList.list.length;i<len;i++){
-          that.currentList.list[i].isShow = false;
-          if(that.currentList.list[i].word_name.match(val) !== null){
-            that.currentList.list[i].isShow = true;
-            num ++;
-            that.currentList.list[i].num = num;
-            //list.push(that.currentList.list[i]);
-          }
-        }
-      }
-      else{
-        for(var i=0,len=that.currentList.list.length;i<len;i++){
-          that.currentList.list[i].isShow = true;
-          that.currentList.list[i].num = i+1;
-         
-        }
-      }
-    }
+    
   },
   filters : {
     
@@ -188,8 +158,11 @@ export default {
     const api = 'static/cet4/cet4-'+name+'.js';
   
     var myCategory = localStorage.getItem('myCategory')
+    var remark = localStorage.getItem('remark')
     try {
       myCategory = JSON.parse(myCategory)
+      that.remark = JSON.parse(remark) || {}
+      console.log(that.remark,"that.remark")
     } catch(e){
       console.log(e)
     }
@@ -283,51 +256,8 @@ export default {
             }
           }
         }
-        for(var o in that.list2){
-          that.list2[o].wordList[0].sort(function(){
-            return .5 -Math.random()
-          })
-          that.list2[o].meanList[0].sort(function(){
-            return .5 -Math.random()
-          })
-          var list = that.list2[o].list;
-          that.group[o] = [];
-          if(list.length){
-            var findStr = list[0].word_name.substr(0,3);
-            that.group[o].push(findStr);
-            for(var i=1,len=list.length;i<len;i++ ){
-              var str = list[i].word_name.substr(0,3);
-              if(str !== findStr){
-                that.group[o].push(str);
-                findStr = str;
-              }
-            }
-          }
-          
-        }
-        console.log("that.list2",that.list2)
-        that.list2Clone = Object.assign({},that.list2)
-        console.log("that.list2Clone",that.list2Clone)
-        that.currentList = that.list2[that.list1[0]]
-        that.currentList.wordList = that.list2[that.list1[that.swiperIndex]].wordList
-        that.currentList.meanList = that.list2[that.list1[that.swiperIndex]].meanList
-        console.log("that.currentList",that.currentList)
-
-        switch(that.type){
-          case 0:
-            
-            break;
-          case 1:
-            
-            that.popupData = that.currentList.wordList;
-            break;
-           case 2:
-           
-            
-            that.popupData = that.currentList.meanList;
-            break;
-        }
-        that.currentListClone = Object.assign({},that.currentList);
+        
+        
         that.$vux.loading.hide()
 
       })
@@ -335,6 +265,16 @@ export default {
     
   },
   methods: {
+      editRemark: function(wordName){
+        var that = this
+        that.isShowRemarkConfirm = true
+
+        that.currentWord = wordName
+      },
+      saveRemark: function(){
+        var that = this
+        localStorage.setItem("remark",JSON.stringify(that.remark))
+      },
       getMoreSentence: function(item) {
         var that = this
         let param = new URLSearchParams()
@@ -358,6 +298,7 @@ export default {
         var that = this
         that.activeKey = value
         that.labelIndex = index
+        that.swiperIndex = that.currentLabel[that.activeKey] || 0
       },
       addNewCategory: function(){
         var that = this
@@ -386,216 +327,27 @@ export default {
         var that = this
         that.activeCategory = item
       },
-      onCancel: function(){
-        var that = this
-        that.activeCategory = ''
-      },
-      onConfirm: function(name){
-         var that = this
-         try{
-            //that.activeCategory.word = JSON.parse(that.activeCategory.word)
-            var activeWord = Object.assign({},that.activeWord)
-            delete activeWord.isShow
-            delete activeWord.num
-            that.activeCategory.word.push(activeWord)
-            console.log(that.myCategory)
-            var myCategory = JSON.stringify(that.myCategory)
-            localStorage.setItem('myCategory',myCategory)
-         } catch(e){
-            console.log(e)
-         }
-         
-      },
-      onHide: function(){
-
-      },
-      onShow: function(){
-         
-      }, 
+       
       addToCategory: function(item) {
         var that = this
         that.isShowConfirm = true
         that.activeWord = item
       },
-      backspace : function(){
-        var that = this;
-
-        console.log(that.searchInputValue)
-        if(that.searchInputValue){
-          that.searchInputValue = that.searchInputValue.substr(0,that.searchInputValue.length-1);
-        }
-      },
+      
       getKey:function(key){
         var that = this;
         key = key.toLowerCase();
         that.searchInputValue += key;
       },
-      wordFilter : function(matchStr){
-        var that = this;
-        that.searchInputValue = matchStr;
-        
-        
-      },
-      wordColor : function(a,b) {
-        if(b){
-          if(a.match(b) !== null){
-            var index = a.indexOf(b);
-            var str1 = a.substring(0,index );
-            if(str1){
-              str1 = "<span>" + str1 + "</span>";
-            }
-            var str2 = a.substring(index+b.length);
-            if(str2){
-              str2 = "<span>" + str2 + "</span>"
-            }
-            b = '<span>' + b + '</span>';
-            var word = str1 +b + str2;
-            console.log(word)
-            return word;
-          }
-          else{
-            return a;
-          }
-        }
-        else {
-          return a;
-        }
-      },
-      searchAll : function(){
-        var that = this;
-        that.searchInputValue = "";
-        
-      },
-      showSearch : function(){
-        console.log("00")
-        var that = this;
-        that.isSearch = !that.isSearch;
-      },
-      hidePopup : function(){
-        var that = this;
-        that.isShowPopupPicker = false;
-      },
-      hideSearchPopup : function(){
-        var that = this;
-        that.isSearchPicker = false;
-      },
-    
-      showPopupPicker : function(index,value){
-        var that = this;
-        
-        that.itemIndex = index;
-        if(that.type === 1){
-          that.popupTitle = that.currentList.list[that.itemIndex].means;
-          that.popupTitle = that.popupTitle.replace(/<br>/g,'|')
-        }
-        else if(that.type === 2){
-          that.popupTitle = that.currentList.list[that.itemIndex].word_name;
-        }
-        console.log(that.popupTitle)
-        that.popupData[0].sort(function(){
-            return .5 -Math.random()
-        })
-        var newData = that.popupData[0].slice(0,6);
-
-        var isFind = false;
-        for(var i=0,len=newData.length;i<len;i++){
-          if(newData[i] === value){
-            isFind = true;
-            break;
-          }
-        }
-        if(!isFind){
-          newData[newData.length-1] = value;
-        }
-        newData.sort(function(){
-            return .5 -Math.random()
-        })
-        //that.popupData[0] = newData;
-        Vue.set(that.popupData, 0, newData)
-        that.isShowPopupPicker = true;
-
-        
-      },
-      play : function(type){
-        var that =  this;
-        that.type = type;
-        switch(type){
-          case 0:
-            
-            break;
-          case 1:
-            
-            that.popupData = that.currentList.wordList;
-            break;
-           case 2:
-           
-            
-            that.popupData = that.currentList.meanList;
-            break;
-        }
-
-      },
+     
+      
+     
       changeSwiper : function(index){
         var that = this;
-        that.isSearch = false;
-        that.isSearchPicker = false;
-        that.searchInputValue = "";
-        console.log("that.list2Clone",that.list2Clone)
-        that.currentList.list = Object.assign([],that.currentListClone.list);
-        //searchInputValue新旧值相同时不会触发watch
-        for(var i=0,len=that.currentList.list.length;i<len;i++){
-          that.currentList.list[i].isShow = true;
-          that.currentList.list[i].num = i+1;
-         
-        }
         that.swiperIndex = index;
-        console.log(that.swiperIndex)
-        
-        
-        that.currentList = that.list2[that.list1[index]];
-        that.currentListClone = Object.assign({},that.currentList);
-        console.log(that.currentList)
-        switch(that.type){
-          case 0:
-            
-            break;
-          case 1:
-            
-            that.popupData = that.currentList.wordList;
-            break;
-           case 2:
-           
-            
-            that.popupData = that.currentList.meanList;
-            break;
-        }
+        that.currentLabel[that.activeKey] = that.swiperIndex
       },
-      showPopup : function(){
-      },
-      
-      changeWordPopup : function(){
-        var that = this;
-        if(that.type === 1){
-          that.currentList.wordModelList[that.itemIndex] = that.popupValue;
-        }
-        else if(that.type === 2){
-          that.currentList.meanModelList[that.itemIndex] = that.popupValue;
-        }
-        
-        console.log("that.list2",that.list2)
-        console.log("that.list2Clone",that.list2Clone)
-      },
-      changeMeanPopup : function(index){
-        var that = this;
-
-        var meanModelList = Object.assign([],that.currentList.meanModelList[index])
-        Vue.set(that.meanModelList, index, meanModelList)//没有这行popup-picker的v-model视图不能更新
-        console.log("that.list2",that.list2)
-        console.log("that.list2Clone",that.list2Clone)
-      },
-      showSentence : function(item){
-        item.showSentence = !item.showSentence;
-      }
+     
 
    
    
@@ -665,6 +417,15 @@ export default {
   text-align:right;
   padding-right:5px;
   line-height: normal;
+}
+.big-size1{
+  font-size:28px;
+}
+.big-size2{
+  font-size:24px;
+}
+.big-size3{
+  font-size:20px;
 }
  .size1{
   font-size:18px;
@@ -750,53 +511,10 @@ export default {
   .item-operate .operate-row .operate-btn{
     padding:0 10px;
   }
-  .item-row .field-date{
-    /*background:url(../assets/pencil.png) right center no-repeat;*/
+  .item-row {
+    padding:5px 0;
   }
-  .item-row .input-wrapper{
-    height:30px;
-    width:65%;
-    margin-right:5px;
-    display:block;
-  }
-  .item-row .input-wrapper .input{
-    background:none;
-    border:none;
-    padding-left:6px;
-    width:100%;
-    height:100%;
-    position:absolute;
-    z-index:10;
-
-  }
-  .item-row .input-wrapper .input:focus{
-    outline:none;
-  }
-  .type0 .item-row .item-left{
-    padding-left:25px;
-    width:76%;
-  }
-  .type0 .item-row .item-left p:first-of-type{
-    margin-bottom:7px;
-  }
-  .type0 .item-row .item-left .sentence{
-    line-height:20px;
-  }
-  .type0 .item-row .item-left .sentence1{
-      padding:7px 0 2px 0;
-      
-  }
-  .type1 .item-row1{
-    margin-bottom:5px;
-    width:80%;
-  } 
-  .type1 .item-row .item-left,.type2 .item-row .item-left{
-    width: 65%;
-    padding-left: 25px;
-  }
-  .type1 .item-row .item-left{
-    width:70%;
-  }
+  
   .notice{
     height:50px;
     padding:0 10px;
@@ -877,5 +595,7 @@ export default {
   .bot p.active{
     color:#52A3E3;
   }
-  
+  .sentence{
+    line-height:24px;
+  }
 </style>
