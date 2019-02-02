@@ -13,12 +13,12 @@
     <div class="index-main">
       <swiper v-model="tabIndex" height="100%" :show-dots="false" @on-index-change="changeSwiper">
         <swiper-item v-for="(swiperItem,swiperIndex) in tabList" class="box-justify item"  :key="swiperIndex" :selected="swiperIndex===tabIndex"> 
-          <div class="item-wrapper" v-if="swiperIndex < 4">
+          <div class="item-wrapper" v-if="swiperIndex < 5">
             <div v-for="(item,index) in list" class="box-justify item"> 
               <a v-for="(innerItem,innerIndex) in item" class="box-center" @click="go(innerItem)">{{innerItem}}</a>
             </div>
           </div>
-          <div v-if="swiperIndex === 4">
+          <div v-if="swiperIndex === 5">
             <x-button type="primary" action-type="button" @click.native="myCatgory">我的分类</x-button>
           </div>
         </swiper-item>
@@ -49,7 +49,7 @@ export default {
     return {
         type : 0,
         tabIndex : 0,
-        tabList : ["学习模式","中英练习","英中练习","句子练习","自定义"],
+        tabList : ["翻屏模式","列表模式","中英练习","英中练习","句子练习","自定义"],
         list :[
                 ["A","B","C","D","E"],
                 ["F","G","H","I","J"],
@@ -66,6 +66,16 @@ export default {
   created(){
     var that = this;
     that.$vux.loading.hide();
+    if(navigator.userAgent.toLowerCase().match("windows") !== null){
+      this.$vux.toast.show({
+       text: '使用手机或平板浏览此网站效果更佳',
+       type: "text",
+       width: '600px',
+       position: 'top',
+       time: 20 * 1000
+      })
+    }
+    
   },
   methods: {
     myCatgory: function(){
@@ -75,10 +85,13 @@ export default {
     go : function(value){
       var that = this;
       value = value.toLowerCase();
-      if(that.type < 3){
+      if(that.type === 0){
+        that.$router.push({ name: 'word2', params: { name:value,type:that.type}})
+      }
+      else if(that.type < 4 && that.type >= 1){
         that.$router.push({ name: 'word', params: { name:value,type:that.type}})
       }
-      else if(that.type === 3){
+      else if(that.type === 4){
         that.$router.push({ name: 'sentenceSelect', params: { name:value}})
       }
       

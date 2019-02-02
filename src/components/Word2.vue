@@ -1,120 +1,55 @@
 <template>
   <div class="tab-container box-v-start align-stretch">
     <div class="tab-header">
-      <tab :line-width=2 active-color='#52A3E3' v-model="swiperIndex">
-        <tab-item class="vux-center" :selected="index === swiperIndex" v-for="(value,index) in list1"  :key="index" badge-background="#38C972"  >
+      <tab :line-width=2 active-color='#52A3E3'>
+        <tab-item class="vux-center" :selected="index === labelIndex" v-for="(value,index) in list1"  :key="index" badge-background="#38C972" @on-item-click="selectLabel(value,index)" >
           <div class="box-center color2">
             <p>{{value}}</p>
-            <p class="circle box-center">{{list2[value].list.length}}</p>
+            <p v-if="list2[value] && list2[value].list" class="circle box-center">{{list2[value].list.length}}</p>
           </div>
         </tab-item>
       </tab>
     </div>  
     <div class="rest" style="overflow:auto;">
       
-        <swiper v-model="swiperIndex" height="100%" :show-dots="false" @on-index-change="changeSwiper">
+        <swiper v-if="activeKey && list2[activeKey] && list2[activeKey].list" v-model="swiperIndex" height="100%" :show-dots="false" @on-index-change="changeSwiper">
           <!--<scroller class="scroll-wrapper" :on-refresh="refresh"
                :on-infinite="infiniteHandler"
                style="padding-top: 44px;">-->
-          <swiper-item v-for="(value,key,outerIndex) in list2" :key="outerIndex" :selected="outerIndex===swiperIndex">
+          <swiper-item  v-for="(item, index) in list2[activeKey].list" :key="index" :selected="index===swiperIndex">
             <!--<div v-show="outerIndex !== swiperIndex" style="height:100%"><loading :show="showLoading" text="Loading"></loading></div>-->
-            <div> 
-              <div v-for="(item, index) in value.list" :key="index" class="tab-swiper  vux-1px-b" v-show="item.isShow">
-                <div v-if="type === 0" class="type0" >
-                  <div  class="item-row item-row1">
-                    <div class="size1 box-start">
-                        <p class="num color3 box-end">{{item.num}}.</p>
-                        <p class="color1 en-size1" v-html="wordColor(item.word_name,searchInputValue)"></p>
-                        <p @click="addToCategory(item)" style="margin-left:20px;font-size:20px">+</p>
-                        
-                    </div>
+            <div style="height:100%;overflow:hidden"> 
+              <div class="tab-swiper box-v-center" style="height:100%;" v-show="item.isShow">
+                <div  class="item-row item-row1" style="padding:10px">
+                  <div class="size1 box-center">
+                      <p class="num color3 box-end">{{item.num}}.</p>
+                      <p class="color1 en-size1">{{item.word_name}}</p>
+                      <p @click="addToCategory(item)" style="margin-left:20px;font-size:20px">+</p>
+                      
                   </div>
-                  <div class="item-row item-row2 ">
-                    
-                    <div class="item-left">
-                      <p class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
-                      <p class=" color2 size3 " v-html="item.means"></p>
-                      <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
-                      <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
-                      <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_cn}}</p>-->
-                      <p  class="sentence sentence1 color3 size3">{{item.sentence.Network_en}}</p>
-                      <p  class="sentence sentence2 color3 size3">{{item.sentence.Network_cn}}</p>
+                  <p class="color2 size3 ellipsis box-start">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
+                  <p class=" color2 size3 box-start" v-html="item.means"></p>
+                  
+                </div>
+                <div class="rest" style="margin-top:20px;overflow:auto;padding:10px">
+                  <template v-if="!item.moreSentence">
+                    <p  class="sentence sentence1 color3 size3 box-start">{{item.sentence.Network_en}}</p>
+                    <p  class="sentence sentence2 color3 size3 box-start">{{item.sentence.Network_cn}}</p>
+                    <p class="box-center color3 size3" @click="getMoreSentence(item)">more</p>
+                  </template>
+                  <div v-if="item.moreSentence" style="overflow:auto;">
+                    <div v-for="(sentenceItem,sentenceIndex) in item.moreSentence" :key="sentenceIndex" class="sentence sentence2 color3 size3 box-v-center align-start" style="padding:10px 0">
+                      <p>{{sentenceItem.Network_en}}</p>
+                      <p>{{sentenceItem.Network_cn}}</p>
                     </div>
                   </div>
                 </div>
-                 <div class="type1" v-if="type === 1" >
-                   <div class="item-row item-row1 box-start">
-                    <p class="num color3 ">{{item.num}}.</p>
-                    <p class=" color1 size3 rest" v-html="item.means"></p>
-                   </div>
-                   <div  class="box-start item-row" >
-                       
-                       <div class="color2  box-justify item-left" >
-                          <p class="input-wrapper vux-1px">
-                             <input class=" input box-center size1" :readonly="(value.wordModelList[index][0] && value.wordModelList[index][0] === item.word_name) ? true : false" type="text" v-model="list2[key].wordModelList[index][0]">
-                          </p>
-                          
-                          <p @click="showPopupPicker(index,item.word_name)" class="size3 color3" v-show="!value.wordModelList[index][0] || (value.wordModelList[index][0] && value.wordModelList[index][0] !== item.word_name)" >点击选择</p>
-                          <!--<p class="size1">{{value.wordModelList[index][0]}}</p>-->
-                       </div>
-                       <!--<p style="display:none">{{wordModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
-                       
-                     <p class="item-right" v-show="value.wordModelList[index][0] && value.wordModelList[index][0] === item.word_name"><icon  type="success"></icon></p>
-                     <p class="item-right" v-show="value.wordModelList[index][0] && value.wordModelList[index][0] !== item.word_name"><icon  type="warn"></icon></p>
-                   </div>
-                   <div class="item-row" v-show="value.wordModelList[index][0] && value.wordModelList[index][0] === item.word_name">
-                      <div class="item-left">
-                        <p style="margin:5px 0" class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
-                        <p  class="sentence sentence1 color3 size3">{{item.sentence.Network_en}}</p>
-                        <p  class="sentence sentence2 color3 size3">{{item.sentence.Network_cn}}</p>
-                    </div>
-                   </div>
-                   
-                 </div>
-                 <div class="type2" v-if="type === 2" @click="showPopupPicker(index,item.means)">
-                   <div  class="item-row item-row1 box-start">
-                     <p class="num color3 ">{{item.num}}.</p>
-                     <p class="color1 en-size1">{{item.word_name}}</p>
-                   </div>
-                   <div  class="box-start item-row item-row2" >
-                       <div class="color2 size2 item-left" >
-                          <p class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
-                          <div class="box-justify">
-                            <p class="color3 size3" v-show="!value.meanModelList[index][0]" >点击选择</p>
-                            <p class="color2 size3">{{value.meanModelList[index][0]}}</p>
-                          </div>
-                       </div>
-                       <!--<p style="display:none">{{meanModelList[index]}}</p>--><!--没有这行popup-picker的v-model视图不能更新-->
-                       
-                     <p class="item-right" v-show="value.meanModelList[index][0] && value.meanModelList[index][0] === item.means"><icon  type="success"></icon></p>
-                     <p class="item-right" v-show="value.meanModelList[index][0] && value.meanModelList[index][0] !== item.means"><icon  type="warn"></icon></p>
-                   </div>
-                   <div class="item-row" v-show="value.meanModelList[index][0] && value.meanModelList[index][0] === item.means">
-                     <div class="item-left" style="margin-top:5px">
-                      <p  class="sentence sentence1 color3 size3">{{item.sentence.Network_en}}</p>
-                      <p  class="sentence sentence2 color3 size3">{{item.sentence.Network_cn}}</p>
-                     </div>
-                   </div>
-                 </div>
-               
-               
               </div>
             </div>
           </swiper-item>
           <!--</scroller>-->
         </swiper>
-      
     </div>
-    <!--<div class="bot box-justify color2 size2">
-        <p class="box-center" :class="type === 0?'active' : ''" @click="play(0)" >学习模式</p>
-        <p class="apart-line vux-1px-l"></p>
-        <p class="box-center" :class="type === 1?'active' : ''" @click="play(1)">中英练习</p>
-        <p class="apart-line vux-1px-l"></p>
-        <p class="box-center" :class="type === 2?'active' : ''" @click="play(2)">英中练习</p>
-    </div>-->
-    <popup-picker style="display:none"  class="size2 color2" :show="isShowPopupPicker" title="点击选择" :data="popupData" @on-hide="hidePopup()" @on-show="showPopup()" @on-change="changeWordPopup()" v-model="popupValue" :popup-title="popupTitle">
-      
-    </popup-picker><!--只初始化一个-->
     <div v-transfer-dom>
       <confirm v-model="isShowConfirm"
       ref="confirm1"
@@ -134,35 +69,8 @@
         </div>
       </confirm>
     </div>
-      
-   
-    <div id="right" >
-      <div class="inner-right-wrapper box-v-justify">
-        <div class="inner-empty"></div>
-        <div class="inner-right box-v-start rest">
-          <div v-show="searchInputValue === ''" class="size3 icon-wrapper" @click="searchAll">
-            <x-icon  style="fill:#F70968;" type="ios-heart" size="38" ></x-icon>
-            <div class="icon-name box-center" style="color:#fff">all</div>
-          </div>
-          <div v-show="searchInputValue !== ''" class="size3 icon-wrapper" @click="searchAll">
-            <x-icon  style="fill:#F70968;" type="ios-heart-outline" size="38" ></x-icon>
-            <div class="icon-name box-center" style="color:#F70968">all</div>
-          </div>
-          <div class="icon-wrapper size3" v-for="(item, index) in searchData" :key="index" @click="wordFilter(item)">
-            <x-icon style="fill:#F70968;" v-show="searchInputValue!=='' && (searchInputValue === item)"  type="ios-heart" size="38" ></x-icon>
-            <x-icon style="fill:#F70968;" v-show="searchInputValue !== item"  type="ios-heart-outline" size="38" ></x-icon>
-            <div class="icon-name box-center" :class="searchInputValue && (searchInputValue === item)?'current-name':''">{{item}}</div>
-          </div>
-          
-          
-        </div>
-      </div>
-    </div>
   </div>
 </template>
-
-
-
 <script>
 import Vue from 'vue'
 import axios from 'axios';
@@ -200,13 +108,16 @@ export default {
   },
   data () {
     return {
+      sentenceApi : 'http://www.pangfanqie.com/word/php/get-oneword-sentence.php',
+      labelIndex: 0,
+      activeKey: '',
       newCategory: '',
       activeWord: null,
       activeCategory: '',
       myCategory: [],
       confirmTitle: '添加到我的分类',
       isShowConfirm: false,
-      type : Number(this.$route.params.type)-1 || 0,
+      type : Number(this.$route.params.type) || 0,
       index01: 0,
       list1: [],
       list2: {},
@@ -224,7 +135,6 @@ export default {
       popupTitle : "",
       isSearch : false,
       isSearchPicker : false,
-      searchData : [],
       searchValue : [""],
       group : {},
       searchInputValue : "",
@@ -287,7 +197,6 @@ export default {
       that.myCategory = myCategory
     }
     
-    console.log("that.searchData",that.searchData)
     //that.firstKey = that.list1[0];
     //console.log(that.$router.history.current.params.name)
     
@@ -314,6 +223,8 @@ export default {
             tabStr = temp;
           }
         }
+        that.activeKey = that.list1[0]
+        console.log(that.activeKey)
         for(var i = 0,len=that.list1.length;i<len;i++){
           /*that.list2[that.list1[i]] = {
             list : [],
@@ -394,7 +305,6 @@ export default {
           }
           
         }
-        that.searchData = that.group[that.list1[that.swiperIndex]];
         console.log("that.list2",that.list2)
         that.list2Clone = Object.assign({},that.list2)
         console.log("that.list2Clone",that.list2Clone)
@@ -425,6 +335,30 @@ export default {
     
   },
   methods: {
+      getMoreSentence: function(item) {
+        var that = this
+        let param = new URLSearchParams()
+        param.append('word', item.word_name)
+        axios({
+            url:that.sentenceApi,
+            method: 'post',
+            data: param,
+            headers:{
+            }
+            
+          })
+          .then(response=>{
+            console.log(response.data)
+            Vue.set(item, "moreSentence", response.data)
+            //item.moreSentence = response.data
+            that.$vux.loading.hide()
+          })
+      },
+      selectLabel: function(value,index) {
+        var that = this
+        that.activeKey = value
+        that.labelIndex = index
+      },
       addNewCategory: function(){
         var that = this
 
@@ -616,9 +550,7 @@ export default {
         }
         that.swiperIndex = index;
         console.log(that.swiperIndex)
-        if(that.group){
-          that.searchData = that.group[that.list1[that.swiperIndex]];
-        }
+        
         
         that.currentList = that.list2[that.list1[index]];
         that.currentListClone = Object.assign({},that.currentList);
@@ -712,9 +644,9 @@ export default {
   html body .weui-icon-search{
     font-size:24px;
   }
-  .vux-swiper-item .tab-swiper:last-of-type{
-    margin-bottom:50px;
-  }
+  /*.vux-swiper-item .tab-swiper:last-of-type{
+    margin-bottom:44px;
+  }*/
   
   html body .weui-icon-clear{
     display:block!important;

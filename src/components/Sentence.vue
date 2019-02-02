@@ -34,8 +34,9 @@
                       
                       <div class="item-left">
                         <p class="color3 size2" >{{item.Network_cn}}</p>
+                        <p v-show="item.isActive && isAnswer">{{ value.list[index].word_name }}</p>
                         <p v-show="!isShowKeybord ||(isShowKeybord && (isTip || (value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase())))" class="color3 size3 ellipsis rest">英&nbsp;[{{value.list[index].ph_en}}] &nbsp;美&nbsp;[{{value.list[index].ph_am}}]</p>
-                        <p v-show="!isShowKeybord ||(isShowKeybord && (isTip || (value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase())))" class=" color3 size3 ">{{value.list[index].means}}</p>
+                        <p v-show="!isShowKeybord ||(isShowKeybord && (isTip || (value.list[index].model.toLowerCase() === value.list[index].word_name.toLowerCase())))" class=" color3 size3 " v-html="value.list[index].means"></p>
 
                         <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
                         <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
@@ -64,11 +65,12 @@
     </popup-picker><!--只初始化一个-->
     <div class="bot ">
       <div class="bot-inner box-v-start">
-        <div v-show="!isShowKeybord" class="box-v-start algin-center" style="margin-bottom:-10px;" @click="isShowKeybord=true">
+        <div v-show="!isShowKeybord" class="box-v-start algin-center" style="margin-bottom:-10px;" @click="showKeyBord">
           <x-icon style="margin-bottom:-20px;fill:#f9832a" type="ios-arrow-up" size="40"></x-icon>
           <x-icon type="ios-arrow-up" style="fill:#f9832a" size="40"></x-icon>
         </div>
         <div v-show="isShowKeybord" class="keybord vux-1px-t" >
+          <div v-if="currentListItem" class="box-center" style="margin:0 0 5px 0">{{ currentListItem.model }}</div>
           <div class="box-justify keybord-item">
             <p @click="getKey('a')">a</p>
             <p @click="getKey('b')">b</p>
@@ -108,10 +110,10 @@
           <div class="box-justify keybord-item">
             <p @click="getKey('y')">y</p>
             <p @click="getKey('z')">z</p>
-            <p style="border:none" class="chinese" :style="isTip?'color:blue':''" @click="isTip = !isTip">提示</p>
-            <p style="border:none" class="chinese" @click="getAnswer">答案</p>
-            <p style="margin-bottom:-10px;border:none"><x-icon style="fill:#f9832a;" type="ios-arrow-thin-left" size="30" @click="backspace"></x-icon></p>
-            <p style="margin-bottom:-10px;border:none"><x-icon style="fill:#f9832a;" type="ios-close-outline" size="30" @click="isShowKeybord=false"></x-icon></p>
+            <p style="border:none" class="chinese" :style="isTip?'color:#5454d8':''" @click="isTip = !isTip;isAnswer = false">提示</p>
+            <p style="border:none" class="chinese" :style="isAnswer?'color:#5454d8':''" @click="getAnswer">答案</p>
+            <p style="margin-bottom:2px;border:none"><x-icon style="fill:#f9832a;" type="ios-arrow-thin-left" size="30" @click="backspace"></x-icon></p>
+            <p style="margin-bottom:2px;border:none"><x-icon style="fill:#f9832a;" type="ios-close-outline" size="30" @click="isShowKeybord=false"></x-icon></p>
           </div>
         </div>
       </div>
@@ -158,8 +160,10 @@ export default {
   },
   data () {
     return {
-      sentenceApi : location.hostname==='localhost'?'http://localhost/word/php/get-sentence.php':'/word/php/get-sentence.php',
+      // sentenceApi : location.hostname==='localhost'?'http://localhost/word/php/get-sentence.php':'/word/php/get-sentence.php',
+      sentenceApi : 'http://www.pangfanqie.com/word/php/get-sentence.php',
       isTip: false,
+      isAnswer: false,
       currentListItem: null,
       currentListItemIndex: 0,
       isShowKeybord:false,
@@ -272,11 +276,19 @@ export default {
                 console.log(e,words[o])
                 continue;
               }
-
+             
               wordObj.sentence = JSON.parse(wordObj.sentence)
               wordObj.showSentence = false
               wordObj.symbols = JSON.parse(wordObj.symbols)
-              wordObj.means = wordObj.symbols[0]["parts"][0].part + wordObj.symbols[0]["parts"][0].means.join(";")
+              wordObj.means = ''
+              for (var j = 0; j < wordObj.symbols[0]["parts"].length; j++) {
+                var temp = wordObj.symbols[0]["parts"][j].part + wordObj.symbols[0]["parts"][j].means.join(";")
+                if (j < wordObj.symbols[0]["parts"].length - 1) {
+                  temp += '<br>'
+                }
+                wordObj.means += temp
+              }
+              // wordObj.means = wordObj.symbols[0]["parts"][0].part + wordObj.symbols[0]["parts"][0].means.join(";")
               wordObj.ph_am = wordObj.symbols[0].ph_am
               wordObj.ph_en = wordObj.symbols[0].ph_en
               wordObj.isShow = true;
@@ -337,14 +349,8 @@ export default {
     
   },
   methods: {
-      getAnswer: function(){
-        var that  = this
-        that.currentListItem.model = that.currentListItem.word_name
-        var key = that.list1[that.swiperIndex]
-        that.list2[key].sentences[that.currentListItemIndex].isActive = false
-        that.currentListItemIndex ++
-        that.list2[key].sentences[that.currentListItemIndex].isActive = true
-        that.currentListItem = that.list2[key].list[that.currentListItemIndex]
+      showKeyBord: function() {
+        this.isShowKeybord=true
         setTimeout(function(){
           var target = $(".vux-swiper-item[selected=selected]")
           var top = target.find(".sentence-active").offset().top - 60
@@ -353,6 +359,17 @@ export default {
 
           target.animate({scrollTop: scrollTop+top}, 800)
         },1000)
+      },
+      getAnswer: function(){
+        var that  = this
+        if(that.isAnswer){
+          that.isAnswer = false
+          that.isTip = false
+        }
+        else{
+          that.isAnswer = true
+          that.isTip = true
+        }
       },
       backspace:function(){
         var that = this
@@ -380,6 +397,7 @@ export default {
         }
         that.currentListItem.model += key 
         if(that.currentListItem.model === that.currentListItem.word_name){
+          that.isAnswer = false
           var key = that.list1[that.swiperIndex]
           that.list2[key].sentences[that.currentListItemIndex].isActive = false
           that.currentListItemIndex ++
@@ -546,17 +564,24 @@ export default {
         var that = this;
         that.swiperIndex = index;
         var key = that.list1[index]
-        
+
         if(that.list2[key].sentences.length > 0){
-          if(that.list2[key].sentences[0]){
+          
+          var haveActive = false
+          for(var i=that.list2[key].sentences.length-1;i>=0;i--){
+            that.list2[key].sentences[i].isActive = false
+            if(that.list2[key].list[i].model !== "?"){
+              that.list2[key].sentences[i].isActive = true
+              haveActive = true
+              that.currentListItem = that.list2[key].list[i]
+              that.currentListItemIndex = i
+              break
+            }
+          }
+          if(!haveActive && that.list2[key].sentences[0]){
             that.currentListItem = that.list2[key].list[0]
             that.currentListItemIndex = 0
-          }
-          for(var i=0,len=that.list2[key].sentences.length;i<len;i++){
-            that.list2[key].sentences[i].isActive = false
-            if(i === that.currentListItemIndex){
-              that.list2[key].sentences[i].isActive = true
-            }
+            that.list2[key].sentences[0].isActive = true
           }
           setTimeout(function(){
             var target = $(".vux-swiper-item[selected=selected]")
@@ -605,17 +630,15 @@ export default {
               }
             }
             Vue.set(that.list2,key,obj)
+            for(var i=that.list2[key].sentences.length-1;i>=0;i--){
+              that.list2[key].sentences[i].isActive = false
+            }
             if(that.list2[key].sentences[0]){
               that.currentListItem = that.list2[key].list[0]
               that.currentListItemIndex = 0
+              that.list2[key].sentences[0].isActive = true
             }
-            for(var i=0,len=that.list2[key].sentences.length;i<len;i++){
-              that.list2[key].sentences[i].isActive = false
-              if(i === that.currentListItemIndex){
-                that.list2[key].sentences[i].isActive = true
-              }
-            }
-            that.$vux.loading.hide()
+            
             setTimeout(function(){
               var target = $(".vux-swiper-item[selected=selected]")
               var top = target.find(".sentence-active").offset().top - 60
@@ -624,6 +647,8 @@ export default {
 
               target.animate({scrollTop: scrollTop+top}, 800)
             },1000)
+            that.$vux.loading.hide()
+            
           })
         
       },
@@ -654,7 +679,7 @@ export default {
 
 
   html body .tab-swiper{
-    padding:10px 0 15px 0;
+    padding:10px 0 10px 0;
   }
   html body .vux-no-group-title{
     margin-top:0;
@@ -928,10 +953,11 @@ export default {
   }
   .bot .keybord .keybord-item p{
     text-align:center;
-    font-size:20px;
-    padding:3px;
+    font-size:16px;
+    height:20px;
+    line-height:20px;
     border: solid 1px #52A3E3;
-    border-radius: 10px;
+    border-radius: 6px;
     width:10%;
   }
   .bot .keybord .keybord-item p.chinese{
@@ -941,6 +967,15 @@ export default {
       .bot .keybord .keybord-item{
         margin-bottom:20px;
         padding:0 20px;
+      }
+      .bot .keybord .keybord-item p{
+        text-align:center;
+        font-size:20px;
+        height:26px;
+        line-height:26px;
+        border: solid 1px #52A3E3;
+        border-radius: 10px;
+        width:10%;
       }
   }
 
