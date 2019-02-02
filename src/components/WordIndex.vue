@@ -18,13 +18,24 @@
               <a v-for="(innerItem,innerIndex) in item" class="box-center" @click="go(innerItem)">{{innerItem}}</a>
             </div>
           </div>
-          <div v-if="swiperIndex === 5">
-            <x-button type="primary" action-type="button" @click.native="myCatgory">我的分类</x-button>
+          <div v-if="swiperIndex === 5" style="width:100%">
+            <div style="width:50%">
+              <x-button type="primary" action-type="button" @click.native="myCatgory">我的分类</x-button>
+              <x-button type="primary" action-type="button" @click.native="exportData">导出备注</x-button>
+              <x-button type="primary" action-type="button" @click.native="importData">导入备注</x-button>
+            </div>
+            <textarea style="width:100%;text-indent:5px;box-sizing: border-box;margin:10px auto;height:160px;border:1px solid #C7C7C7" placeholder="备注" v-model="remark"></textarea>
           </div>
         </swiper-item>
       </swiper>
         
     </div>
+    <confirm v-model="isShowRemarkConfirm"
+    ref="confirm2"
+    :title="remarkConfirmTitle"
+    @on-confirm="saveRemark">
+
+    </confirm> 
   </div>
 </template>
 
@@ -33,7 +44,7 @@
 <script>
 import Vue from 'vue'
 
-import { Tab, TabItem,Swiper, SwiperItem,Loading,XButton } from 'vux'  
+import { Tab, TabItem,Swiper, SwiperItem,Loading,XButton, Confirm } from 'vux'  
 
 export default {
   components: {
@@ -42,11 +53,15 @@ export default {
     Swiper, 
     SwiperItem,
     Loading,
-    XButton
+    XButton,
+    Confirm
     
   },
   data () {
     return {
+        isShowRemarkConfirm: false,
+        remarkConfirmTitle: '确定要导入吗？',
+        remark:'',
         type : 0,
         tabIndex : 0,
         tabList : ["翻屏模式","列表模式","中英练习","英中练习","句子练习","自定义"],
@@ -78,6 +93,31 @@ export default {
     
   },
   methods: {
+    exportData: function() {
+      var that = this
+      that.remark = localStorage.getItem('remark')
+    },
+    importData: function() {
+      var that = this
+      if(!that.remark || that.remark === 'null'){
+        this.$vux.toast.show({
+         text: '导入内容为空',
+         type: "text",
+         position: 'top',
+        })
+        return
+      }
+      that.isShowRemarkConfirm = true
+    },
+    saveRemark: function() {
+      var that = this
+      localStorage.setItem("remark",that.remark)
+      this.$vux.toast.show({
+       text: '导入成功',
+       type: "text",
+       position: 'top',
+      })
+    },
     myCatgory: function(){
       var that = this;
       that.$router.push({ name: 'myWord'})

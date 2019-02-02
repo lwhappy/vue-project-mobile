@@ -10,16 +10,17 @@
         </tab-item>
       </tab>
     </div>  
-    <div class="rest" style="overflow:auto;">
+    <div class="rest" style="overflow:auto;" @click="stopPlay">
       
-        <swiper v-if="activeKey && list2[activeKey] && list2[activeKey].list" v-model="swiperIndex" height="100%" :show-dots="false" @on-index-change="changeSwiper">
+        <swiper v-if="activeKey && list2[activeKey] && list2[activeKey].list" v-model="swiperIndex" height="100%" :show-dots="false" @on-index-change="changeSwiper" :auto="autoPlay" :loop="loop" :interval="interval" >
           <!--<scroller class="scroll-wrapper" :on-refresh="refresh"
                :on-infinite="infiniteHandler"
                style="padding-top: 44px;">-->
           <swiper-item  v-for="(item, index) in list2[activeKey].list" :key="index" :selected="index===swiperIndex">
             <!--<div v-show="outerIndex !== swiperIndex" style="height:100%"><loading :show="showLoading" text="Loading"></loading></div>-->
             <div style="height:100%;overflow:hidden"> 
-              <div class="tab-swiper box-v-center align-stretch" style="height:100%;" v-show="item.isShow">
+              <div class="tab-swiper box-v-center align-stretch" style="height:100%;">
+                
                 <div  class="item-row item-row1" style="padding:10px">
                   <div class="size1 box-center">
                       <p class="num color3 box-end">{{item.num}}.</p>
@@ -29,8 +30,15 @@
                   </div>
                   <p class="color2 size2 ellipsis box-start item-row">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
                   <p class=" color2 size1 box-start item-row" v-html="item.means"></p>
-                  <p class=" color2 size2 box-start item-row"><span class="color3 size3" style="margin-right:5px">我的备注：</span> <span class="color2 size2">{{remark[item.word_name]}}</span></p>
-                  <p class=" color3 size3 box-start item-row" @click="editRemark(item.word_name)">修改备注</p>
+                  <div class=" color2 size2 box-justify item-row">
+                    <p>
+                      <span class="color3 size3" style="margin-right:5px">我的备注：</span> 
+                      
+                    </p>
+                    <p class=" color3 size3 box-end item-row" style="width:50px" @click="editRemark(item.word_name)">修改</p>
+                  </div>
+                  <p style="word-break: break-all;" class="color2 size1">{{remark[item.word_name]}}</p>
+                  
                 </div>
                 <div class="rest" style="overflow:auto;padding:10px">
                   <template v-if="!item.moreSentence">
@@ -45,17 +53,23 @@
                     </div>
                   </div>
                 </div>
+                
               </div>
             </div>
           </swiper-item>
           <!--</scroller>-->
         </swiper>
     </div>
+    <div style="padding:10px">
+      <group>
+          <x-switch v-show="isShowSwitch"  title="自动播放" v-model="autoPlay"></x-switch>
+        </group>
+    </div>
     <confirm v-model="isShowRemarkConfirm"
     ref="confirm2"
     :title="remarkConfirmTitle"
     @on-confirm="saveRemark">
-      <group><x-input placeholder="备注" v-model="remark[currentWord]"></x-input></group>
+      <group><textarea style="border:none;width:100%;height:100px;font-size:16px;padding:5px;box-sizing:border-box;line-height:22px" placeholder="备注" v-model="remark[currentWord]"></textarea></group>
       <p style="margin-top:10px" class="color3 size3">注：使用备注请关闭无痕浏览模式，备注只保存在本地，清除浏览器数据后备注也会被清除</p>
     </confirm>  
   </div>
@@ -66,7 +80,7 @@ import axios from 'axios';
 //import config from '../js/cet4/config.js';
 //console.log("config",config)
 
-import { Tab, TabItem, Sticky, Divider, XButton, Swiper, SwiperItem, Datetime, Selector, Marquee, MarqueeItem, Toast , PopupPicker , ButtonTab, ButtonTabItem,Icon ,Loading,Popover,XInput,Confirm,TransferDomDirective as TransferDom, ConfirmPlugin } from 'vux'
+import { Tab, TabItem, Sticky, Divider, XButton, Swiper, SwiperItem, Datetime, Selector, Marquee, MarqueeItem, Toast , PopupPicker , ButtonTab, ButtonTabItem,Icon ,Loading,Popover,XInput,Confirm,TransferDomDirective as TransferDom, ConfirmPlugin ,XSwitch} from 'vux'
 Vue.use(ConfirmPlugin)
 
 export default {
@@ -93,10 +107,17 @@ export default {
     Loading,
     Popover,
     XInput,
-    Confirm 
+    Confirm,
+    XSwitch
   },
   data () {
     return {
+      
+      haveWatchAutoPlay:false,
+      interval: 6000,
+      loop: false,
+      isShowSwitch: false,
+      autoPlay: true,//如果默认false,切换成true时，不能自动播放，为防止闪烁，初始化时通过isShowSwitch控制switch的显示
       currentWord:'',
       isShowRemarkConfirm: false,
       remarkConfirmTitle: '',
@@ -146,7 +167,23 @@ export default {
     }
   },
   watch : {
-    
+    /*autoPlay: function(val,oldVal) {//初始值autoPlay=false,改变值时，不会播放，加一个watch,只watch一次
+      var that = this
+      console.log(val)
+      if(that.haveWatchAutoPlay || !that.isWatchAutoPlay){
+        return
+      }
+      var temp = Object.assign([],that.list2[that.activeKey])
+      that.list2[that.activeKey] = []
+      //debugger
+      setTimeout(function(){
+        that.list2[that.activeKey] = temp
+       // that.swiperIndex++
+        that.haveWatchAutoPlay = true
+      },10)
+      
+      //
+    }*/
   },
   filters : {
     
@@ -156,7 +193,6 @@ export default {
     var that = this;
     var name = that.$router.history.current.params.name;
     const api = 'static/cet4/cet4-'+name+'.js';
-  
     var myCategory = localStorage.getItem('myCategory')
     var remark = localStorage.getItem('remark')
     try {
@@ -257,7 +293,10 @@ export default {
           }
         }
         
-        
+        setTimeout(function(){
+          that.isShowSwitch = true
+          that.autoPlay = false
+        },100)
         that.$vux.loading.hide()
 
       })
@@ -265,6 +304,30 @@ export default {
     
   },
   methods: {
+      setAutoPlay: function() {//初始值autoPlay=false,改变值时，不会播放，加一个watch,只watch一次
+        var that = this
+        if(that.haveWatchAutoPlay){
+          return
+        }
+        var temp = Object.assign([],that.list2[that.activeKey])
+        that.list2[that.activeKey] = []
+        //debugger
+        setTimeout(function(){
+          that.list2[that.activeKey] = temp
+         // that.swiperIndex++
+          that.haveWatchAutoPlay = true
+        },10)
+      },
+      stopPlay: function() {//这里有一个bug,autoPlay为false时，swiper区域任何地方点一下都会触发自动滚动，因此在swiper父元素上加了这个事件
+        var that = this
+        if(!that.autoPlay) {
+          that.autoPlay = "bug"//一定要先设置一个值再重置为false,不要设置成true,不然switch按钮会闪烁
+          setTimeout(function(){
+            that.autoPlay = false
+          },10)
+        }
+        
+      },
       editRemark: function(wordName){
         var that = this
         that.isShowRemarkConfirm = true
@@ -343,7 +406,17 @@ export default {
       
      
       changeSwiper : function(index){
+        console.log(index)
+
         var that = this;
+        console.log(that.autoPlay)
+        if(!that.autoPlay) {
+          that.autoPlay = "bug"//一定要先设置一个值再重置为false,不要设置成true,不然switch按钮会闪烁
+          setTimeout(function(){
+            that.autoPlay = false
+          },10)
+        }
+        
         that.swiperIndex = index;
         that.currentLabel[that.activeKey] = that.swiperIndex
       },
@@ -597,5 +670,8 @@ export default {
   }
   .sentence{
     line-height:24px;
+  }
+  textarea:focus{
+    outline:none;
   }
 </style>
