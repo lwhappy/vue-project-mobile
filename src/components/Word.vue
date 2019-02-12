@@ -20,16 +20,16 @@
             <!--<div v-show="outerIndex !== swiperIndex" style="height:100%"><loading :show="showLoading" text="Loading"></loading></div>-->
             <div> 
               <div v-for="(item, index) in value.list" :key="index" class="tab-swiper  vux-1px-b" v-show="item.isShow">
-                <div v-if="type === 0" class="type0" >
+                <div v-if="type === 0" class="type0" @click="showMore(item)">
                   <div  class="item-row item-row1">
                     <div class="size1 box-start">
                         <p class="num color3 box-end">{{item.num}}.</p>
                         <p class="color1 en-size1" v-html="wordColor(item.word_name,searchInputValue)"></p>
-                        <p @click="addToCategory(item)" style="margin-left:20px;font-size:20px">+</p>
+                        <p @click.prevent.stop="addToCategory(item)" style="margin-left:20px;font-size:20px">+</p>
                         
                     </div>
                   </div>
-                  <div class="item-row item-row2 ">
+                  <div v-show="item.isShowMore" class="item-row item-row2 ">
                     
                     <div class="item-left">
                       <p class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
@@ -37,17 +37,33 @@
                       <!--<p @click="showSentence(item)" class="ellipsis color2 size2">例句</p>
                       <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_en}}</p>
                       <p v-show="item.showSentence" class="ellipsis color2 size2">{{item.sentence.Network_cn}}</p>-->
-                      <p  class="sentence sentence1 color3 size3">{{item.sentence.Network_en}}</p>
-                      <p  class="sentence sentence2 color3 size3">{{item.sentence.Network_cn}}</p>
+                      <div class="box-start align-start">
+                        <p class="color3 size3" style="padding:7px 3px 0 0">1.</p>
+                        <div>
+                          <p  class="sentence sentence1 color3 size3">{{item.sentence.Network_en}}</p>
+                          <p  class="sentence sentence2 color3 size3">{{item.sentence.Network_cn}}</p>
+                        </div>
+                      </div>
+                      <p v-if="item.moreSentence.length === 0" class="box-center color3 size3" @click.prevent.stop="getMoreSentence(item)">more</p>
+                      <div v-if="item.moreSentence.length" style="overflow:auto;">
+                        <div v-if="sentenceIndex > 0" v-for="(sentenceItem,sentenceIndex) in item.moreSentence" :key="sentenceIndex" class="sentence sentence2 color3 size3 box-start align-start" style="padding:5px 0">
+                          <p style="padding:7px 3px 0 0">{{sentenceIndex + 2}}.</p>
+                          <div>
+                            <p class="sentence sentence1 color3 size3 box-start">{{sentenceItem.Network_en}}</p>
+                            <p class="sentence sentence2 color3 size3 box-start">{{sentenceItem.Network_cn}}</p>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
+
                 </div>
                  <div class="type1" v-if="type === 1" >
                    <div class="item-row item-row1 box-start">
                     <p class="num color3 ">{{item.num}}.</p>
                     <p class=" color1 size3 rest" v-html="item.means"></p>
                    </div>
-                   <div  class="box-start item-row" >
+                   <div class="box-start item-row" >
                        
                        <div class="color2  box-justify item-left" >
                           <p class="input-wrapper vux-1px">
@@ -76,7 +92,7 @@
                      <p class="num color3 ">{{item.num}}.</p>
                      <p class="color1 en-size1">{{item.word_name}}</p>
                    </div>
-                   <div  class="box-start item-row item-row2" >
+                   <div class="box-start item-row item-row2" >
                        <div class="color2 size2 item-left" >
                           <p class="color2 size3 ellipsis rest">英&nbsp;[{{item.ph_en}}] &nbsp;美&nbsp;[{{item.ph_am}}]</p>
                           <div class="box-justify">
@@ -99,6 +115,18 @@
                
                
               </div>
+              <div v-if="type === 0">
+                <div>
+                  <div style="padding:5px;font-weight:600">我的笔记</div>
+                  <div v-if="noteItem" style="padding:5px 50px 5px 5px" class="vux-1px-t size2 color2 box-start" v-for="(noteItem,noteIndex) in note[list1[swiperIndex]]">
+                    <p style="padding:0 3px">{{noteIndex + 1}}.</p><p>{{noteItem}}</p>
+                  </div>
+                </div>
+                <textarea class="size2 color2 note" placeholder="请输入内容" v-model="currentNote" style="width:75%;height:200px;margin:10px;padding:10px;border:1px solid #C7C7C7"></textarea>
+                <p style="padding-left:5px;padding-right:50px" class="color3 size3">注：使用此功能请关闭无痕浏览模式，笔记只保存在本地，清除浏览器数据后笔记也会被清除</p>
+                <x-button style="width:70%;margin:10px auto" type="primary" action-type="button" @click.native="saveNote">保存</x-button>
+              </div>
+              
             </div>
           </swiper-item>
           <!--</scroller>-->
@@ -140,6 +168,13 @@
       <div class="inner-right-wrapper box-v-justify">
         <div class="inner-empty"></div>
         <div class="inner-right box-v-start rest">
+          <template v-if="type === 0" >
+            <p class="color2 size3"  @click="fold" style="margin:10px 0">
+              Fold/Unfold
+            </p>
+            
+          </template>
+          <p @click="writeNote" class="color2 size3" style="margin-bottom:5px">Note</p>
           <div v-show="searchInputValue === ''" class="size3 icon-wrapper" @click="searchAll">
             <x-icon  style="fill:#F70968;" type="ios-heart" size="38" ></x-icon>
             <div class="icon-name box-center" style="color:#fff">all</div>
@@ -200,6 +235,13 @@ export default {
   },
   data () {
     return {
+      sentenceApi : 'http://www.pangfanqie.com/word/php/get-oneword-sentence.php',
+      currentNote:'',
+      note: {},
+      userName: '',
+      article: '',
+      publishUrl: 'http://localhost/pfq/tp/index.php/Sd/Index/createEnglish',
+      isShowMore: true,
       newCategory: '',
       activeWord: null,
       activeCategory: '',
@@ -278,8 +320,11 @@ export default {
     const api = 'static/cet4/cet4-'+name+'.js';
   
     var myCategory = localStorage.getItem('myCategory')
+    var note = localStorage.getItem('note')
     try {
       myCategory = JSON.parse(myCategory)
+      note = JSON.parse(note) || {}
+      that.note = note
     } catch(e){
       console.log(e)
     }
@@ -359,6 +404,8 @@ export default {
               wordObj.ph_am = wordObj.symbols[0].ph_am
               wordObj.ph_en = wordObj.symbols[0].ph_en
               wordObj.isShow = true;
+              wordObj.isShowMore = true;
+              wordObj.moreSentence = []
               wordObj.num = that.list2[tabItem].list.length + 1;
               that.list2[tabItem].list.push(wordObj)
               that.list2[tabItem].wordList[0].push(wordObj.word_name)
@@ -425,6 +472,112 @@ export default {
     
   },
   methods: {
+      getMoreSentence: function(item) {
+        var that = this
+        let param = new URLSearchParams()
+        param.append('word', item.word_name)
+        axios({
+            url:that.sentenceApi,
+            method: 'post',
+            data: param,
+            headers:{
+            }
+            
+          })
+          .then(response=>{
+            console.log(response.data)
+            Vue.set(item, "moreSentence", response.data)
+            //item.moreSentence = response.data
+            that.$vux.loading.hide()
+          })
+      },
+      saveNote: function() {
+        var that = this
+        if(that.currentNote === ''){
+          this.$vux.toast.show({
+           text: '内容不能为空',
+           type: "text",
+           position: 'top',
+          })
+          return
+        }
+        var value = that.list1[that.swiperIndex]
+        if(that.note[value]){
+          that.note[value].push(that.currentNote)
+        }
+        else {
+          that.note[value] = [that.currentNote]
+        }
+        localStorage.setItem("note",JSON.stringify(that.note))
+        that.currentNote = ''
+      },
+      publish: function() {
+        var that = this
+        if(that.article === ''){
+          this.$vux.toast.show({
+           text: '内容不能为空',
+           type: "text",
+           position: 'top',
+          })
+          return
+        }
+        this.$vux.confirm.show({
+          title:'确定要发布吗？',
+          onCancel () {
+            console.log(this) // 非当前 vm
+            console.log(_this) // 当前 vm
+          },
+          onConfirm () {
+            let param = new URLSearchParams()
+            param.append('user_name', that.userName)
+            param.append('article', that.article)
+            axios({
+                url:that.publishUrl,
+                method: 'post',
+                data: param,
+                headers:{
+                }
+                
+              })
+              .then(response=>{
+                console.log(response.data)
+                if(response.data.status === '0') {
+                  that.$vux.toast.show({
+                   text: '发布成功',
+                   type: "text",
+                   position: 'top',
+                  })
+                }
+              })
+          }
+        })
+       
+        
+        
+      },
+      writeNote: function() {
+        var target = $(".vux-swiper-item[selected=selected] .note")
+        target.focus()
+      },
+      showMore: function(item) {
+        var that = this
+        item.isShowMore = !item.isShowMore
+      },
+      fold: function() {
+        var that = this
+        that.isShowMore = !that.isShowMore
+        for(var i = 0; i < that.currentList.list.length; i++) {
+          that.currentList.list[i].isShowMore = that.isShowMore
+        }
+        
+      },
+      unfold: function() {
+        var that = this
+        for(var i = 0; i < that.currentList.list.length; i++) {
+          that.currentList.list[i].isShowMore = true
+        }
+        that.isShowMore = true
+      },
       addNewCategory: function(){
         var that = this
 
@@ -608,6 +761,7 @@ export default {
         that.searchInputValue = "";
         console.log("that.list2Clone",that.list2Clone)
         that.currentList.list = Object.assign([],that.currentListClone.list);
+        that.isShowMore = true
         //searchInputValue新旧值相同时不会触发watch
         for(var i=0,len=that.currentList.list.length;i<len;i++){
           that.currentList.list[i].isShow = true;
@@ -726,7 +880,9 @@ export default {
 @import '../css/common.css';
 
 
-
+textarea:focus{
+  outline:none;
+}
 .num{
   width:20px;
   font-size:13px;

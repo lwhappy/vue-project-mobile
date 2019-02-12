@@ -29,16 +29,10 @@ b,
 label,
 input,
 pre,
-textarea {
+textarea,
+button {
     margin: 0;
     padding: 0;
-}
-button {
-    padding: 0;
-    border: none;
-    font: inherit;
-    background-color: transparent;
-    color: inherit;
 }
 
 /* 移除ios Android 上input type=number 时候的小箭头 */
